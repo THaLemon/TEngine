@@ -1,66 +1,57 @@
 ﻿using System;
 
-namespace TEngine
-{
+namespace TEngine {
     /// <summary>
     /// 对象池接口。
     /// </summary>
     /// <typeparam name="T">对象类型。</typeparam>
-    public interface IObjectPool<T> where T : ObjectBase
-    {
+    public interface IObjectPool<T> where T : ObjectBase {
         /// <summary>
         /// 获取对象池名称。
         /// </summary>
-        string Name
-        {
+        string Name {
             get;
         }
 
         /// <summary>
         /// 获取对象池完整名称。
         /// </summary>
-        string FullName
-        {
+        string FullName {
             get;
         }
 
         /// <summary>
         /// 获取对象池对象类型。
         /// </summary>
-        Type ObjectType
-        {
+        Type ObjectType {
             get;
         }
 
         /// <summary>
         /// 获取对象池中对象的数量。
         /// </summary>
-        int Count
-        {
+        int Count {
             get;
         }
 
         /// <summary>
         /// 获取对象池中能被释放的对象的数量。
         /// </summary>
-        int CanReleaseCount
-        {
+        int CanReleaseCount {
             get;
         }
 
         /// <summary>
         /// 获取是否允许对象被多次获取。
         /// </summary>
-        bool AllowMultiSpawn
-        {
+        bool AllowMultiSpawn {
             get;
         }
 
         /// <summary>
         /// 获取或设置对象池自动释放可释放对象的间隔秒数。
         /// </summary>
-        float AutoReleaseInterval
-        {
+        float AutoReleaseInterval {
             get;
             set;
         }
@@ -68,8 +59,7 @@ namespace TEngine
         /// <summary>
         /// 获取或设置对象池的容量。
         /// </summary>
-        int Capacity
-        {
+        int Capacity {
             get;
             set;
         }
@@ -77,8 +67,7 @@ namespace TEngine
         /// <summary>
         /// 获取或设置对象池对象过期秒数。
         /// </summary>
-        float ExpireTime
-        {
+        float ExpireTime {
             get;
             set;
         }
@@ -86,8 +75,7 @@ namespace TEngine
         /// <summary>
         /// 获取或设置对象池的优先级。
         /// </summary>
-        int Priority
-        {
+        int Priority {
             get;
             set;
         }

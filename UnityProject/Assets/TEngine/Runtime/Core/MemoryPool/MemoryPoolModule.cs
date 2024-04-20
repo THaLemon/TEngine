@@ -1,12 +1,10 @@
 ﻿using UnityEngine;
 
-namespace TEngine
-{
+namespace TEngine {
     /// <summary>
     /// 内存强制检查类型。
     /// </summary>
-    public enum MemoryStrictCheckType : byte
-    {
+    public enum MemoryStrictCheckType : byte {
         /// <summary>
         /// 总是启用。
         /// </summary>
@@ -32,30 +30,24 @@ namespace TEngine
     /// 内存池模块。
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class MemoryPoolModule : Module
-    {
+    public sealed class MemoryPoolModule : Module {
         [SerializeField] private MemoryStrictCheckType m_EnableStrictCheck = MemoryStrictCheckType.AlwaysEnable;
 
         /// <summary>
         /// 获取或设置是否开启强制检查。
         /// </summary>
-        public bool EnableStrictCheck
-        {
+        public bool EnableStrictCheck {
             get => MemoryPool.EnableStrictCheck;
-            set
-            {
+            set {
                 MemoryPool.EnableStrictCheck = value;
-                if (value)
-                {
+                if (value) {
                     Log.Info("Strict checking is enabled for the Memory Pool. It will drastically affect the performance.");
                 }
             }
         }
 
-        private void Start()
-        {
-            switch (m_EnableStrictCheck)
-            {
+        private void Start() {
+            switch (m_EnableStrictCheck) {
                 case MemoryStrictCheckType.AlwaysEnable:
                     EnableStrictCheck = true;
                     break;

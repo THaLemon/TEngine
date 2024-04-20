@@ -3,41 +3,33 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 
-namespace TEngine.Editor.UI
-{
-    public class ScriptGenerator
-    {
+namespace TEngine.Editor.UI {
+    public class ScriptGenerator {
         private const string Gap = "/";
 
         [MenuItem("GameObject/ScriptGenerator/UIProperty", priority = 41)]
-        public static void MemberProperty()
-        {
+        public static void MemberProperty() {
             Generate(false);
         }
 
         [MenuItem("GameObject/ScriptGenerator/UIProperty - UniTask", priority = 43)]
-        public static void MemberPropertyUniTask()
-        {
+        public static void MemberPropertyUniTask() {
             Generate(false, true);
         }
 
         [MenuItem("GameObject/ScriptGenerator/UIPropertyAndListener", priority = 42)]
-        public static void MemberPropertyAndListener()
-        {
+        public static void MemberPropertyAndListener() {
             Generate(true);
         }
 
         [MenuItem("GameObject/ScriptGenerator/UIPropertyAndListener - UniTask", priority = 44)]
-        public static void MemberPropertyAndListenerUniTask()
-        {
+        public static void MemberPropertyAndListenerUniTask() {
             Generate(true, true);
         }
 
-        private static void Generate(bool includeListener, bool isUniTask = false)
-        {
+        private static void Generate(bool includeListener, bool isUniTask = false) {
             var root = Selection.activeTransform;
-            if (root != null)
-            {
+            if (root != null) {
                 StringBuilder strVar = new StringBuilder();
                 StringBuilder strBind = new StringBuilder();
                 StringBuilder strOnCreate = new StringBuilder();
@@ -45,13 +37,11 @@ namespace TEngine.Editor.UI
                 Ergodic(root, root, ref strVar, ref strBind, ref strOnCreate, ref strCallback, isUniTask);
                 StringBuilder strFile = new StringBuilder();
 
-                if (includeListener)
-                {
+                if (includeListener) {
 #if ENABLE_TEXTMESHPRO
                     strFile.Append("using TMPro;\n");
 #endif
-                    if (isUniTask)
-                    {
+                    if (isUniTask) {
                         strFile.Append("using Cysharp.Threading.Tasks;\n");
                     }
 
@@ -75,8 +65,7 @@ namespace TEngine.Editor.UI
                 strFile.Append("\t\t}\n");
                 strFile.Append("\t\t#endregion");
 
-                if (includeListener)
-                {
+                if (includeListener) {
                     strFile.Append("\n\n");
                     // #region 事件
                     strFile.Append("\t\t#region 事件\n");
@@ -95,14 +84,11 @@ namespace TEngine.Editor.UI
         }
 
         private static void Ergodic(Transform root, Transform transform, ref StringBuilder strVar, ref StringBuilder strBind, ref StringBuilder strOnCreate,
-            ref StringBuilder strCallback, bool isUniTask)
-        {
-            for (int i = 0; i < transform.childCount; ++i)
-            {
+            ref StringBuilder strCallback, bool isUniTask) {
+            for (int i = 0; i < transform.childCount; ++i) {
                 Transform child = transform.GetChild(i);
                 WriteScript(root, child, ref strVar, ref strBind, ref strOnCreate, ref strCallback, isUniTask);
-                if (child.name.StartsWith("m_item"))
-                {
+                if (child.name.StartsWith("m_item")) {
                     // 子 Item 不再往下遍历
                     continue;
                 }
@@ -111,12 +97,10 @@ namespace TEngine.Editor.UI
             }
         }
 
-        private static string GetRelativePath(Transform child, Transform root)
-        {
+        private static string GetRelativePath(Transform child, Transform root) {
             StringBuilder path = new StringBuilder();
             path.Append(child.name);
-            while (child.parent != null && child.parent != root)
-            {
+            while (child.parent != null && child.parent != root) {
                 child = child.parent;
                 path.Insert(0, Gap);
                 path.Insert(0, child.name);
@@ -125,45 +109,37 @@ namespace TEngine.Editor.UI
             return path.ToString();
         }
 
-        public static string GetBtnFuncName(string varName)
-        {
+        public static string GetBtnFuncName(string varName) {
             return "OnClick" + varName.Replace("m_btn", string.Empty) + "Btn";
         }
 
-        public static string GetToggleFuncName(string varName)
-        {
+        public static string GetToggleFuncName(string varName) {
             return "OnToggle" + varName.Replace("m_toggle", string.Empty) + "Change";
         }
 
-        public static string GetSliderFuncName(string varName)
-        {
+        public static string GetSliderFuncName(string varName) {
             return "OnSlider" + varName.Replace("m_slider", string.Empty) + "Change";
         }
 
         private static void WriteScript(Transform root, Transform child, ref StringBuilder strVar, ref StringBuilder strBind, ref StringBuilder strOnCreate,
-            ref StringBuilder strCallback, bool isUniTask)
-        {
+            ref StringBuilder strCallback, bool isUniTask) {
             string varName = child.name;
             string componentName = string.Empty;
 
             var rule = SettingsUtils.GetScriptGenerateRule().Find(t => varName.StartsWith(t.uiElementRegex));
 
-            if (rule != null)
-            {
+            if (rule != null) {
                 componentName = rule.componentName;
             }
 
-            if (componentName == string.Empty)
-            {
+            if (componentName == string.Empty) {
                 return;
             }
 
             string varPath = GetRelativePath(child, root);
-            if (!string.IsNullOrEmpty(varName))
-            {
+            if (!string.IsNullOrEmpty(varName)) {
                 strVar.Append("\t\tprivate " + componentName + " " + varName + ";\n");
-                switch (componentName)
-                {
+                switch (componentName) {
                     case "Transform":
                         strBind.Append($"\t\t\t{varName} = FindChild(\"{varPath}\");\n");
                         break;
@@ -197,31 +173,23 @@ namespace TEngine.Editor.UI
                         break;
                 }
 
-                if (componentName == "Button")
-                {
+                if (componentName == "Button") {
                     string varFuncName = GetBtnFuncName(varName);
-                    if (isUniTask)
-                    {
+                    if (isUniTask) {
                         strOnCreate.Append($"\t\t\t{varName}.onClick.AddListener(UniTask.UnityAction({varFuncName}));\n");
                         strCallback.Append($"\t\tprivate async UniTaskVoid {varFuncName}()\n");
                         strCallback.Append("\t\t{\n await UniTask.Yield();\n\t\t}\n");
-                    }
-                    else
-                    {
+                    } else {
                         strOnCreate.Append($"\t\t\t{varName}.onClick.AddListener({varFuncName});\n");
                         strCallback.Append($"\t\tprivate void {varFuncName}()\n");
                         strCallback.Append("\t\t{\n\t\t}\n");
                     }
-                }
-                else if (componentName == "Toggle")
-                {
+                } else if (componentName == "Toggle") {
                     string varFuncName = GetToggleFuncName(varName);
                     strOnCreate.Append($"\t\t\t{varName}.onValueChanged.AddListener({varFuncName});\n");
                     strCallback.Append($"\t\tprivate void {varFuncName}(bool isOn)\n");
                     strCallback.Append("\t\t{\n\t\t}\n");
-                }
-                else if (componentName == "Slider")
-                {
+                } else if (componentName == "Slider") {
                     string varFuncName = GetSliderFuncName(varName);
                     strOnCreate.Append($"\t\t\t{varName}.onValueChanged.AddListener({varFuncName});\n");
                     strCallback.Append($"\t\tprivate void {varFuncName}(float value)\n");
@@ -230,24 +198,19 @@ namespace TEngine.Editor.UI
             }
         }
 
-        public class GeneratorHelper : EditorWindow
-        {
+        public class GeneratorHelper : EditorWindow {
             [MenuItem("GameObject/ScriptGenerator/About", priority = 49)]
-            public static void About()
-            {
+            public static void About() {
                 GeneratorHelper welcomeWindow = (GeneratorHelper)EditorWindow.GetWindow(typeof(GeneratorHelper), false, "About");
             }
 
-            public void Awake()
-            {
+            public void Awake() {
                 minSize = new Vector2(400, 600);
             }
 
-            protected void OnGUI()
-            {
+            protected void OnGUI() {
                 GUILayout.BeginVertical();
-                foreach (var item in SettingsUtils.GetScriptGenerateRule())
-                {
+                foreach (var item in SettingsUtils.GetScriptGenerateRule()) {
                     GUILayout.Label(item.uiElementRegex + "：\t" + item.componentName);
                 }
 
@@ -255,43 +218,36 @@ namespace TEngine.Editor.UI
             }
         }
 
-        public class SwitchGroupGenerator
-        {
+        public class SwitchGroupGenerator {
             private const string Condition = "m_switchGroup";
 
             public static readonly SwitchGroupGenerator Instance = new SwitchGroupGenerator();
 
-            public string Process(Transform root)
-            {
+            public string Process(Transform root) {
                 var sbd = new StringBuilder();
                 var list = new List<Transform>();
                 Collect(root, list);
-                foreach (var node in list)
-                {
+                foreach (var node in list) {
                     sbd.AppendLine(Process(root, node)).AppendLine();
                 }
 
                 return sbd.ToString();
             }
 
-            public void Collect(Transform node, List<Transform> nodeList)
-            {
-                if (node.name.StartsWith(Condition))
-                {
+            public void Collect(Transform node, List<Transform> nodeList) {
+                if (node.name.StartsWith(Condition)) {
                     nodeList.Add(node);
                     return;
                 }
 
                 var childCnt = node.childCount;
-                for (var i = 0; i < childCnt; i++)
-                {
+                for (var i = 0; i < childCnt; i++) {
                     var child = node.GetChild(i);
                     Collect(child, nodeList);
                 }
             }
 
-            private string Process(Transform root, Transform groupTf)
-            {
+            private string Process(Transform root, Transform groupTf) {
                 var parentPath = GetPath(root, groupTf);
                 var name = groupTf.name;
                 var sbd = new StringBuilder(@"
@@ -310,21 +266,17 @@ for (var i = 0; i < childCnt; i++)
                 return sbd.ToString();
             }
 
-            public string GetPath(Transform root, Transform childTf)
-            {
-                if (childTf == null)
-                {
+            public string GetPath(Transform root, Transform childTf) {
+                if (childTf == null) {
                     return string.Empty;
                 }
 
-                if (childTf == root)
-                {
+                if (childTf == root) {
                     return childTf.name;
                 }
 
                 var parentPath = GetPath(root, childTf.parent);
-                if (parentPath == string.Empty)
-                {
+                if (parentPath == string.Empty) {
                     return childTf.name;
                 }
 

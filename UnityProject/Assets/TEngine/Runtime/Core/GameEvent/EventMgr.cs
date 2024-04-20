@@ -1,20 +1,17 @@
 ﻿using System.Collections.Generic;
 
-namespace TEngine
-{
+namespace TEngine {
     /// <summary>
     /// 事件管理器。
     /// </summary>
-    public class EventMgr
-    {
+    public class EventMgr {
         /// <summary>
         /// 事件实体数据。
         /// </summary>
-        private class EventEntryData
-        {
+        private class EventEntryData {
             public object InterfaceWrap;
         };
-        
+
         /// <summary>
         /// 总事件实体数据。
         /// </summary>
@@ -25,11 +22,9 @@ namespace TEngine
         /// </summary>
         /// <typeparam name="T">接口类型。</typeparam>
         /// <returns>接口实例。</returns>
-        public T GetInterface<T>()
-        {
+        public T GetInterface<T>() {
             string typeName = typeof(T).FullName;
-            if (typeName != null && _eventEntryMap.TryGetValue(typeName, out var entry))
-            {
+            if (typeName != null && _eventEntryMap.TryGetValue(typeName, out var entry)) {
                 return (T)entry.InterfaceWrap;
             }
             return default(T);
@@ -40,28 +35,24 @@ namespace TEngine
         /// </summary>
         /// <typeparam name="T">Wrap接口类型。</typeparam>
         /// <param name="callerWrap">callerWrap接口名字。</param>
-        public void RegWrapInterface<T>(T callerWrap)
-        {
+        public void RegWrapInterface<T>(T callerWrap) {
             string typeName = typeof(T).FullName;
             var entry = new EventEntryData();
             entry.InterfaceWrap = callerWrap;
-            if (typeName != null)
-            {
+            if (typeName != null) {
                 _eventEntryMap.Add(typeName, entry);
             }
         }
-        
+
         /// <summary>
         /// 注册wrap的函数。
         /// </summary>
         /// <param name="typeName">类型名称。</param>
         /// <param name="callerWrap">调用接口名。</param>
-        public void RegWrapInterface(string typeName,object callerWrap)
-        {
+        public void RegWrapInterface(string typeName, object callerWrap) {
             var entry = new EventEntryData();
             entry.InterfaceWrap = callerWrap;
-            if (typeName != null)
-            {
+            if (typeName != null) {
                 _eventEntryMap.Add(typeName, entry);
             }
         }
@@ -70,5 +61,13 @@ namespace TEngine
         /// 分发注册器。
         /// </summary>
         public EventDispatcher Dispatcher { get; } = new EventDispatcher();
+        ///// <summary>
+        ///// 打印
+        ///// </summary>
+        //public void PrintEventEntryMap() {
+        //    foreach (var key in _eventEntryMap.Keys) {
+        //        Log.Warning(string.Format("key:{0}; value:{1}", key, _eventEntryMap[key]));
+        //    }
+        //}
     }
 }

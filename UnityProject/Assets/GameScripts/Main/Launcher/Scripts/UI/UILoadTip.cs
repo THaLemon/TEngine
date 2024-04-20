@@ -2,10 +2,8 @@
 using System;
 using TEngine;
 
-namespace GameMain
-{
-    public enum MessageShowType
-    {
+namespace GameMain {
+    public enum MessageShowType {
         None = 0,
         OneButton = 1,
         TwoButton = 2,
@@ -13,8 +11,7 @@ namespace GameMain
     }
 
     [Window(UILayer.UI, fromResources: true, location: "AssetLoad/UILoadTip")]
-    public class UILoadTip : UIWindow
-    {
+    public class UILoadTip : UIWindow {
         public Action OnOk;
         public Action OnCancel;
         public MessageShowType ShowType = MessageShowType.None;
@@ -25,8 +22,7 @@ namespace GameMain
         private Text m_textInfo;
         private Button m_btnIgnore;
         private Button m_btnUpdate;
-        protected override void ScriptGenerator()
-        {
+        protected override void ScriptGenerator() {
             m_btnPackage = FindChildComponent<Button>("BgImage/m_btnPackage");
             m_textTittle = FindChildComponent<Text>("BgImage/m_textTittle");
             m_textInfo = FindChildComponent<Text>("BgImage/m_textInfo");
@@ -40,40 +36,28 @@ namespace GameMain
 
         #region 事件
 
-        private void OnClickPackageBtn()
-        {
-            if (OnOk == null)
-            {
+        private void OnClickPackageBtn() {
+            if (OnOk == null) {
                 m_textInfo.text = "<color=#BA3026>该按钮不应该存在</color>";
-            }
-            else
-            {
+            } else {
                 OnOk();
                 Close();
             }
         }
 
-        private void OnClickIgnoreBtn()
-        {
-            if (OnCancel == null)
-            {
+        private void OnClickIgnoreBtn() {
+            if (OnCancel == null) {
                 m_textInfo.text = "<color=#BA3026>该按钮不应该存在</color>";
-            }
-            else
-            {
+            } else {
                 OnCancel();
                 Close();
             }
         }
 
-        private void OnClickUpdateBtn()
-        {
-            if (OnOk == null)
-            {
+        private void OnClickUpdateBtn() {
+            if (OnOk == null) {
                 m_textInfo.text = "<color=#BA3026>该按钮不应该存在</color>";
-            }
-            else
-            {
+            } else {
                 OnOk();
                 Close();
             }
@@ -81,24 +65,21 @@ namespace GameMain
 
         #endregion
 
-        protected override void OnRefresh()
-        {
+        protected override void OnRefresh() {
             OnOk = (Action)userDatas[1];
             OnCancel = (Action)userDatas[2];
             ShowType = (MessageShowType)userDatas[3];
 
             var loadStyleUI = gameObject.GetComponent<LoadStyle>();
-            if (loadStyleUI)
-            {
+            if (loadStyleUI) {
                 loadStyleUI.SetStyle((LoadStyle.StyleEnum)userDatas[4]);
             }
-            
+
             base.OnRefresh();
             m_btnIgnore.gameObject.SetActive(false);
             m_btnPackage.gameObject.SetActive(false);
             m_btnUpdate.gameObject.SetActive(false);
-            switch (ShowType)
-            {
+            switch (ShowType) {
                 case MessageShowType.OneButton:
                     m_btnUpdate.gameObject.SetActive(true);
                     break;
@@ -129,9 +110,8 @@ namespace GameMain
             LoadStyle.StyleEnum style = LoadStyle.StyleEnum.Style_Default,
             Action onOk = null,
             Action onCancel = null,
-            Action onPackage = null)
-        {
-            GameModule.UI.ShowUI<UILoadTip>(desc,onOk,onCancel,showtype,style);
+            Action onPackage = null) {
+            GameModule.UI.ShowUI<UILoadTip>(desc, onOk, onCancel, showtype, style);
         }
     }
 }

@@ -2,22 +2,17 @@
 using UnityEngine.Audio;
 using YooAsset;
 
-namespace TEngine
-{
-    public class AudioData : MemoryObject
-    {
+namespace TEngine {
+    public class AudioData : MemoryObject {
         public AssetHandle AssetOperationHandle { private set; get; }
 
         public bool InPool { private set; get; } = false;
 
-        public override void InitFromPool()
-        {
+        public override void InitFromPool() {
         }
 
-        public override void RecycleToPool()
-        {
-            if (!InPool)
-            {
+        public override void RecycleToPool() {
+            if (!InPool) {
                 AssetOperationHandle.Dispose();
             }
 
@@ -25,8 +20,7 @@ namespace TEngine
             AssetOperationHandle = null;
         }
 
-        internal static AudioData Alloc(AssetHandle assetOperationHandle, bool inPool)
-        {
+        internal static AudioData Alloc(AssetHandle assetOperationHandle, bool inPool) {
             AudioData ret = MemoryPool.Acquire<AudioData>();
             ret.AssetOperationHandle = assetOperationHandle;
             ret.InPool = inPool;
@@ -34,10 +28,8 @@ namespace TEngine
             return ret;
         }
 
-        internal static void DeAlloc(AudioData audioData)
-        {
-            if (audioData != null)
-            {
+        internal static void DeAlloc(AudioData audioData) {
+            if (audioData != null) {
                 MemoryPool.Release(audioData);
                 audioData.RecycleToPool();
             }
@@ -47,8 +39,7 @@ namespace TEngine
     /// <summary>
     /// 音频代理辅助器。
     /// </summary>
-    public class AudioAgent
-    {
+    public class AudioAgent {
         private int _instanceId;
         private AudioSource _source;
         private AudioData _audioData;
@@ -68,8 +59,7 @@ namespace TEngine
         /// <summary>
         /// 音频代理加载请求。
         /// </summary>
-        class LoadRequest
-        {
+        class LoadRequest {
             public string Path;
             public bool BAsync;
             public bool BInPool;
@@ -93,12 +83,9 @@ namespace TEngine
         /// <summary>
         /// 音频代理辅助器音频大小。
         /// </summary>
-        public float Volume
-        {
-            set
-            {
-                if (_source != null)
-                {
+        public float Volume {
+            set {
+                if (_source != null) {
                     _volume = value;
                     _source.volume = _volume;
                 }
@@ -109,16 +96,11 @@ namespace TEngine
         /// <summary>
         /// 音频代理辅助器当前是否空闲。
         /// </summary>
-        public bool IsFree
-        {
-            get
-            {
-                if (_source != null)
-                {
+        public bool IsFree {
+            get {
+                if (_source != null) {
                     return _audioAgentRuntimeState == AudioAgentRuntimeState.End;
-                }
-                else
-                {
+                } else {
                     return true;
                 }
             }
@@ -132,12 +114,9 @@ namespace TEngine
         /// <summary>
         /// 音频代理辅助器当前音频长度。
         /// </summary>
-        public float Length
-        {
-            get
-            {
-                if (_source != null && _source.clip != null)
-                {
+        public float Length {
+            get {
+                if (_source != null && _source.clip != null) {
                     return _source.clip.length;
                 }
 
@@ -148,8 +127,7 @@ namespace TEngine
         /// <summary>
         /// 音频代理辅助器实例位置。
         /// </summary>
-        public Vector3 Position
-        {
+        public Vector3 Position {
             get => _transform.position;
             set => _transform.position = value;
         }
@@ -157,23 +135,16 @@ namespace TEngine
         /// <summary>
         /// 音频代理辅助器是否循环。
         /// </summary>
-        public bool IsLoop
-        {
-            get
-            {
-                if (_source != null)
-                {
+        public bool IsLoop {
+            get {
+                if (_source != null) {
                     return _source.loop;
-                }
-                else
-                {
+                } else {
                     return false;
                 }
             }
-            set
-            {
-                if (_source != null)
-                {
+            set {
+                if (_source != null) {
                     _source.loop = value;
                 }
             }
@@ -182,16 +153,11 @@ namespace TEngine
         /// <summary>
         /// 音频代理辅助器是否正在播放。
         /// </summary>
-        internal bool IsPlaying
-        {
-            get
-            {
-                if (_source != null && _source.isPlaying)
-                {
+        internal bool IsPlaying {
+            get {
+                if (_source != null && _source.isPlaying) {
                     return true;
-                }
-                else
-                {
+                } else {
                     return false;
                 }
             }
@@ -201,8 +167,7 @@ namespace TEngine
         /// 音频代理辅助器获取当前声源。
         /// </summary>
         /// <returns></returns>
-        public AudioSource AudioResource()
-        {
+        public AudioSource AudioResource() {
             return _source;
         }
 
@@ -214,8 +179,7 @@ namespace TEngine
         /// <param name="audioCategory">音频轨道（类别）。</param>
         /// <param name="bInPool">是否池化。</param>
         /// <returns>音频代理辅助器。</returns>
-        public static AudioAgent Create(string path, bool bAsync, AudioCategory audioCategory, bool bInPool = false)
-        {
+        public static AudioAgent Create(string path, bool bAsync, AudioCategory audioCategory, bool bInPool = false) {
             AudioAgent audioAgent = new AudioAgent();
             audioAgent.Init(audioCategory);
             audioAgent.Load(path, bAsync, bInPool);
@@ -227,8 +191,7 @@ namespace TEngine
         /// </summary>
         /// <param name="audioCategory">音频轨道（类别）。</param>
         /// <param name="index">音频代理辅助器编号。</param>
-        public void Init(AudioCategory audioCategory, int index = 0)
-        {
+        public void Init(AudioCategory audioCategory, int index = 0) {
             _audioModuleImp = ModuleImpSystem.GetModule<AudioModuleImp>();
             GameObject host = new GameObject(Utility.Text.Format("Audio Agent Helper - {0} - {1}", audioCategory.AudioMixerGroup.name, index));
             host.transform.SetParent(audioCategory.InstanceRoot);
@@ -252,39 +215,29 @@ namespace TEngine
         /// <param name="path">资源路径。</param>
         /// <param name="bAsync">是否异步。</param>
         /// <param name="bInPool">是否池化。</param>
-        public void Load(string path, bool bAsync, bool bInPool = false)
-        {
+        public void Load(string path, bool bAsync, bool bInPool = false) {
             _inPool = bInPool;
-            if (_audioAgentRuntimeState == AudioAgentRuntimeState.None || _audioAgentRuntimeState == AudioAgentRuntimeState.End)
-            {
+            if (_audioAgentRuntimeState == AudioAgentRuntimeState.None || _audioAgentRuntimeState == AudioAgentRuntimeState.End) {
                 _duration = 0;
-                if (!string.IsNullOrEmpty(path))
-                {
-                    if (bInPool && _audioModuleImp.AudioClipPool.TryGetValue(path, out var operationHandle))
-                    {
+                if (!string.IsNullOrEmpty(path)) {
+                    if (bInPool && _audioModuleImp.AudioClipPool.TryGetValue(path, out var operationHandle)) {
                         OnAssetLoadComplete(operationHandle);
                         return;
                     }
 
-                    if (bAsync)
-                    {
+                    if (bAsync) {
                         _audioAgentRuntimeState = AudioAgentRuntimeState.Loading;
                         AssetHandle handle = GameModule.Resource.LoadAssetAsyncHandle<AudioClip>(path);
                         handle.Completed += OnAssetLoadComplete;
-                    }
-                    else
-                    {
+                    } else {
                         AssetHandle handle = GameModule.Resource.LoadAssetGetOperation<AudioClip>(path);
                         OnAssetLoadComplete(handle);
                     }
                 }
-            }
-            else
-            {
+            } else {
                 _pendingLoad = new LoadRequest { Path = path, BAsync = bAsync, BInPool = bInPool };
 
-                if (_audioAgentRuntimeState == AudioAgentRuntimeState.Playing)
-                {
+                if (_audioAgentRuntimeState == AudioAgentRuntimeState.Playing) {
                     Stop(true);
                 }
             }
@@ -294,30 +247,23 @@ namespace TEngine
         /// 停止播放音频代理辅助器。
         /// </summary>
         /// <param name="fadeout">是否渐出。</param>
-        public void Stop(bool fadeout = false)
-        {
-            if (_source != null)
-            {
-                if (fadeout)
-                {
+        public void Stop(bool fadeout = false) {
+            if (_source != null) {
+                if (fadeout) {
                     _fadeoutTimer = FadeoutDuration;
                     _audioAgentRuntimeState = AudioAgentRuntimeState.FadingOut;
-                }
-                else
-                {
+                } else {
                     _source.Stop();
                     _audioAgentRuntimeState = AudioAgentRuntimeState.End;
                 }
             }
         }
-        
+
         /// <summary>
         /// 暂停音频代理辅助器。
         /// </summary>
-        public void Pause()
-        {
-            if (_source != null)
-            {
+        public void Pause() {
+            if (_source != null) {
                 _source.Pause();
             }
         }
@@ -325,10 +271,8 @@ namespace TEngine
         /// <summary>
         /// 取消暂停音频代理辅助器。
         /// </summary>
-        public void UnPause()
-        {
-            if (_source != null)
-            {
+        public void UnPause() {
+            if (_source != null) {
                 _source.UnPause();
             }
         }
@@ -337,20 +281,15 @@ namespace TEngine
         /// 资源加载完成。
         /// </summary>
         /// <param name="handle">资源操作句柄。</param>
-        void OnAssetLoadComplete(AssetHandle handle)
-        {
-            if (handle != null)
-            {
-                if (_inPool)
-                {
+        void OnAssetLoadComplete(AssetHandle handle) {
+            if (handle != null) {
+                if (_inPool) {
                     _audioModuleImp.AudioClipPool.TryAdd(handle.GetAssetInfo().Address, handle);
                 }
             }
 
-            if (_pendingLoad != null)
-            {
-                if (!_inPool && handle != null)
-                {
+            if (_pendingLoad != null) {
+                if (!_inPool && handle != null) {
                     handle.Dispose();
                 }
 
@@ -360,11 +299,8 @@ namespace TEngine
                 bool bInPool = _pendingLoad.BInPool;
                 _pendingLoad = null;
                 Load(path, bAsync, bInPool);
-            }
-            else if (handle != null)
-            {
-                if (_audioData != null)
-                {
+            } else if (handle != null) {
+                if (_audioData != null) {
                     AudioData.DeAlloc(_audioData);
                     _audioData = null;
                 }
@@ -372,18 +308,13 @@ namespace TEngine
                 _audioData = AudioData.Alloc(handle, _inPool);
 
                 _source.clip = handle.AssetObject as AudioClip;
-                if (_source.clip != null)
-                {
+                if (_source.clip != null) {
                     _source.Play();
                     _audioAgentRuntimeState = AudioAgentRuntimeState.Playing;
-                }
-                else
-                {
+                } else {
                     _audioAgentRuntimeState = AudioAgentRuntimeState.End;
                 }
-            }
-            else
-            {
+            } else {
                 _audioAgentRuntimeState = AudioAgentRuntimeState.End;
             }
         }
@@ -392,27 +323,18 @@ namespace TEngine
         /// 轮询音频代理辅助器。
         /// </summary>
         /// <param name="elapseSeconds">逻辑流逝时间，以秒为单位。</param>
-        public void Update(float elapseSeconds)
-        {
-            if (_audioAgentRuntimeState == AudioAgentRuntimeState.Playing)
-            {
-                if (!_source.isPlaying)
-                {
+        public void Update(float elapseSeconds) {
+            if (_audioAgentRuntimeState == AudioAgentRuntimeState.Playing) {
+                if (!_source.isPlaying) {
                     _audioAgentRuntimeState = AudioAgentRuntimeState.End;
                 }
-            }
-            else if (_audioAgentRuntimeState == AudioAgentRuntimeState.FadingOut)
-            {
-                if (_fadeoutTimer > 0f)
-                {
+            } else if (_audioAgentRuntimeState == AudioAgentRuntimeState.FadingOut) {
+                if (_fadeoutTimer > 0f) {
                     _fadeoutTimer -= elapseSeconds;
                     _source.volume = _volume * _fadeoutTimer / FadeoutDuration;
-                }
-                else
-                {
+                } else {
                     Stop();
-                    if (_pendingLoad != null)
-                    {
+                    if (_pendingLoad != null) {
                         string path = _pendingLoad.Path;
                         bool bAsync = _pendingLoad.BAsync;
                         bool bInPool = _pendingLoad.BInPool;
@@ -430,15 +352,12 @@ namespace TEngine
         /// <summary>
         /// 销毁音频代理辅助器。
         /// </summary>
-        public void Destroy()
-        {
-            if (_transform != null)
-            {
+        public void Destroy() {
+            if (_transform != null) {
                 Object.Destroy(_transform.gameObject);
             }
 
-            if (_audioData != null)
-            {
+            if (_audioData != null) {
                 AudioData.DeAlloc(_audioData);
             }
         }

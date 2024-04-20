@@ -1,9 +1,7 @@
 ﻿using System;
 
-namespace GameLogic
-{
+namespace GameLogic {
     [AttributeUsage(AttributeTargets.Class)]
-    public class BaseAttribute: Attribute
-    {
+    public class BaseAttribute : Attribute {
     }
 }

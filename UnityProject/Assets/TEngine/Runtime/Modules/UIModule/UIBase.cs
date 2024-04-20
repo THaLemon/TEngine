@@ -3,18 +3,15 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace TEngine
-{
+namespace TEngine {
     /// <summary>
     /// UI基类。
     /// </summary>
-    public class UIBase
-    {
+    public class UIBase {
         /// <summary>
         /// UI类型。
         /// </summary>
-        public enum UIType
-        {
+        public enum UIType {
             /// <summary>
             /// 类型无。
             /// </summary>
@@ -30,7 +27,7 @@ namespace TEngine
             /// </summary>
             Widget,
         }
-        
+
         /// <summary>
         /// 所属UI父节点。
         /// </summary>
@@ -89,36 +86,31 @@ namespace TEngine
         /// <summary>
         /// 代码自动生成绑定。
         /// </summary>
-        protected virtual void ScriptGenerator()
-        {
+        protected virtual void ScriptGenerator() {
         }
 
         /// <summary>
         /// 绑定UI成员元素。
         /// </summary>
-        protected virtual void BindMemberProperty()
-        {
+        protected virtual void BindMemberProperty() {
         }
 
         /// <summary>
         /// 注册事件。
         /// </summary>
-        protected virtual void RegisterEvent()
-        {
+        protected virtual void RegisterEvent() {
         }
 
         /// <summary>
         /// 窗口创建。
         /// </summary>
-        protected virtual void OnCreate()
-        {
+        protected virtual void OnCreate() {
         }
 
         /// <summary>
         /// 窗口刷新
         /// </summary>
-        protected virtual void OnRefresh()
-        {
+        protected virtual void OnRefresh() {
         }
 
         /// <summary>
@@ -129,65 +121,54 @@ namespace TEngine
         /// <summary>
         /// 窗口更新
         /// </summary>
-        protected virtual void OnUpdate()
-        {
+        protected virtual void OnUpdate() {
             HasOverrideUpdate = false;
         }
 
-        internal void CallDestroy()
-        {
+        internal void CallDestroy() {
             OnDestroy();
         }
 
         /// <summary>
         /// 窗口销毁
         /// </summary>
-        protected virtual void OnDestroy()
-        {
+        protected virtual void OnDestroy() {
         }
 
         /// <summary>
         /// 当触发窗口的层级排序。
         /// </summary>
-        protected virtual void OnSortDepth(int depth)
-        {
+        protected virtual void OnSortDepth(int depth) {
         }
 
         /// <summary>
         /// 当因为全屏遮挡触或者窗口可见性触发窗口的显隐。
         /// </summary>
-        protected virtual void OnSetVisible(bool visible)
-        {
+        protected virtual void OnSetVisible(bool visible) {
         }
 
-        internal void SetUpdateDirty()
-        {
+        internal void SetUpdateDirty() {
             m_updateListValid = false;
-            if (Parent != null)
-            {
+            if (Parent != null) {
                 Parent.SetUpdateDirty();
             }
         }
 
         #region FindChildComponent
 
-        public Transform FindChild(string path)
-        {
+        public Transform FindChild(string path) {
             return UnityExtension.FindChild(rectTransform, path);
         }
 
-        public Transform FindChild(Transform trans, string path)
-        {
+        public Transform FindChild(Transform trans, string path) {
             return UnityExtension.FindChild(trans, path);
         }
 
-        public T FindChildComponent<T>(string path) where T : Component
-        {
+        public T FindChildComponent<T>(string path) where T : Component {
             return UnityExtension.FindChildComponent<T>(rectTransform, path);
         }
 
-        public T FindChildComponent<T>(Transform trans, string path) where T : Component
-        {
+        public T FindChildComponent<T>(Transform trans, string path) where T : Component {
             return UnityExtension.FindChildComponent<T>(trans, path);
         }
 
@@ -197,48 +178,36 @@ namespace TEngine
 
         private GameEventMgr _eventMgr;
 
-        protected GameEventMgr EventMgr
-        {
-            get
-            {
-                if (_eventMgr == null)
-                {
+        protected GameEventMgr EventMgr {
+            get {
+                if (_eventMgr == null) 
                     _eventMgr = MemoryPool.Acquire<GameEventMgr>();
-                }
-
                 return _eventMgr;
             }
         }
 
-        public void AddUIEvent(int eventType, Action handler)
-        {
+        public void AddUIEvent(int eventType, Action handler) {
             EventMgr.AddEvent(eventType, handler);
         }
 
-        protected void AddUIEvent<T>(int eventType, Action<T> handler)
-        {
+        protected void AddUIEvent<T>(int eventType, Action<T> handler) {
             EventMgr.AddEvent(eventType, handler);
         }
 
-        protected void AddUIEvent<T, U>(int eventType, Action<T, U> handler)
-        {
+        protected void AddUIEvent<T, U>(int eventType, Action<T, U> handler) {
             EventMgr.AddEvent(eventType, handler);
         }
 
-        protected void AddUIEvent<T, U, V>(int eventType, Action<T, U, V> handler)
-        {
+        protected void AddUIEvent<T, U, V>(int eventType, Action<T, U, V> handler) {
             EventMgr.AddEvent(eventType, handler);
         }
 
-        protected void AddUIEvent<T, U, V, W>(int eventType, Action<T, U, V, W> handler)
-        {
+        protected void AddUIEvent<T, U, V, W>(int eventType, Action<T, U, V, W> handler) {
             EventMgr.AddEvent(eventType, handler);
         }
 
-        protected void RemoveAllUIEvent()
-        {
-            if (_eventMgr != null)
-            {
+        protected void RemoveAllUIEvent() {
+            if (_eventMgr != null) {
                 MemoryPool.Release(_eventMgr);
             }
         }
@@ -255,12 +224,10 @@ namespace TEngine
         /// <param name="visible">是否可见。</param>
         /// <typeparam name="T">UIWidget。</typeparam>
         /// <returns>UIWidget实例。</returns>
-        public T CreateWidget<T>(string goPath, bool visible = true) where T : UIWidget, new()
-        {
+        public T CreateWidget<T>(string goPath, bool visible = true) where T : UIWidget, new() {
             var goRootTrans = FindChild(goPath);
 
-            if (goRootTrans != null)
-            {
+            if (goRootTrans != null) {
                 return CreateWidget<T>(goRootTrans.gameObject, visible);
             }
 
@@ -277,11 +244,9 @@ namespace TEngine
         /// <param name="visible">是否可见。</param>
         /// <typeparam name="T">UIWidget。</typeparam>
         /// <returns>UIWidget实例。</returns>
-        public T CreateWidget<T>(Transform parentTrans, string goPath, bool visible = true) where T : UIWidget, new()
-        {
+        public T CreateWidget<T>(Transform parentTrans, string goPath, bool visible = true) where T : UIWidget, new() {
             var goRootTrans = FindChild(parentTrans, goPath);
-            if (goRootTrans != null)
-            {
+            if (goRootTrans != null) {
                 return CreateWidget<T>(goRootTrans.gameObject, visible);
             }
 
@@ -296,11 +261,9 @@ namespace TEngine
         /// <param name="visible">是否可见。</param>
         /// <typeparam name="T">UIWidget。</typeparam>
         /// <returns>UIWidget实例。</returns>
-        public T CreateWidget<T>(GameObject goRoot, bool visible = true) where T : UIWidget, new()
-        {
+        public T CreateWidget<T>(GameObject goRoot, bool visible = true) where T : UIWidget, new() {
             var widget = new T();
-            if (widget.Create(this, goRoot, visible))
-            {
+            if (widget.Create(this, goRoot, visible)) {
                 return widget;
             }
 
@@ -315,8 +278,7 @@ namespace TEngine
         /// <param name="visible">是否可见。</param>
         /// <typeparam name="T">UIWidget。</typeparam>
         /// <returns>UIWidget实例。</returns>
-        public T CreateWidgetByPath<T>(Transform parentTrans, string assetLocation, bool visible = true) where T : UIWidget, new()
-        {
+        public T CreateWidgetByPath<T>(Transform parentTrans, string assetLocation, bool visible = true) where T : UIWidget, new() {
             GameObject goInst = GameModule.Resource.LoadGameObject(assetLocation, parent: parentTrans);
             return CreateWidget<T>(goInst, visible);
         }
@@ -329,8 +291,7 @@ namespace TEngine
         /// <param name="visible">是否可见。</param>
         /// <typeparam name="T">UIWidget。</typeparam>
         /// <returns>UIWidget实例。</returns>
-        public async UniTask<T> CreateWidgetByPathAsync<T>(Transform parentTrans, string assetLocation, bool visible = true) where T : UIWidget, new()
-        {
+        public async UniTask<T> CreateWidgetByPathAsync<T>(Transform parentTrans, string assetLocation, bool visible = true) where T : UIWidget, new() {
             GameObject goInst = await GameModule.Resource.LoadGameObjectAsync(assetLocation, parentTrans, gameObject.GetCancellationTokenOnDestroy());
             return CreateWidget<T>(goInst, visible);
         }
@@ -343,11 +304,9 @@ namespace TEngine
         /// <param name="visible">是否可见。</param>
         /// <typeparam name="T">UIWidget。</typeparam>
         /// <returns>UIWidget实例。</returns>
-        public T CreateWidgetByPrefab<T>(GameObject goPrefab, Transform parentTrans = null, bool visible = true) where T : UIWidget, new()
-        {
+        public T CreateWidgetByPrefab<T>(GameObject goPrefab, Transform parentTrans = null, bool visible = true) where T : UIWidget, new() {
             var widget = new T();
-            if (!widget.CreateByPrefab(this, goPrefab, parentTrans, visible))
-            {
+            if (!widget.CreateByPrefab(this, goPrefab, parentTrans, visible)) {
                 return null;
             }
 
@@ -361,8 +320,7 @@ namespace TEngine
         /// <param name="visible">是否可见。</param>
         /// <typeparam name="T">UIWidget。</typeparam>
         /// <returns>UIWidget实例。</returns>
-        public T CreateWidgetByType<T>(Transform parentTrans, bool visible = true) where T : UIWidget, new()
-        {
+        public T CreateWidgetByType<T>(Transform parentTrans, bool visible = true) where T : UIWidget, new() {
             return CreateWidgetByPath<T>(parentTrans, typeof(T).Name, visible);
         }
 
@@ -373,8 +331,7 @@ namespace TEngine
         /// <param name="visible">是否可见。</param>
         /// <typeparam name="T">UIWidget。</typeparam>
         /// <returns>UIWidget实例。</returns>
-        public async UniTask<T> CreateWidgetByTypeAsync<T>(Transform parentTrans, bool visible = true) where T : UIWidget, new()
-        {
+        public async UniTask<T> CreateWidgetByTypeAsync<T>(Transform parentTrans, bool visible = true) where T : UIWidget, new() {
             return await CreateWidgetByPathAsync<T>(parentTrans, typeof(T).Name, visible);
         }
 
@@ -389,24 +346,18 @@ namespace TEngine
         /// <param name="assetPath">资产地址。</param>
         /// <typeparam name="T">图标类型。</typeparam>
         public void AdjustIconNum<T>(List<T> listIcon, int number, Transform parentTrans, GameObject prefab = null, string assetPath = "")
-            where T : UIWidget, new()
-        {
-            if (listIcon == null)
-            {
+            where T : UIWidget, new() {
+            if (listIcon == null) {
                 listIcon = new List<T>();
             }
 
-            if (listIcon.Count < number)
-            {
+            if (listIcon.Count < number) {
                 int needNum = number - listIcon.Count;
-                for (int iconIdx = 0; iconIdx < needNum; iconIdx++)
-                {
+                for (int iconIdx = 0; iconIdx < needNum; iconIdx++) {
                     T tmpT = prefab == null ? CreateWidgetByType<T>(parentTrans) : CreateWidgetByPrefab<T>(prefab, parentTrans);
                     listIcon.Add(tmpT);
                 }
-            }
-            else if (listIcon.Count > number)
-            {
+            } else if (listIcon.Count > number) {
                 RemoveUnUseItem<T>(listIcon, number);
             }
         }
@@ -424,8 +375,7 @@ namespace TEngine
         /// <typeparam name="T"></typeparam>
         public void AsyncAdjustIconNum<T>(List<T> listIcon, int tarNum, Transform parentTrans, GameObject prefab = null,
             string assetPath = "", int maxNumPerFrame = 5,
-            Action<T, int> updateAction = null) where T : UIWidget, new()
-        {
+            Action<T, int> updateAction = null) where T : UIWidget, new() {
             AsyncAdjustIconNumInternal(listIcon, tarNum, parentTrans, maxNumPerFrame, updateAction, prefab, assetPath).Forget();
         }
 
@@ -441,30 +391,21 @@ namespace TEngine
         /// <param name="assetPath"></param>
         /// <typeparam name="T"></typeparam>
         private async UniTaskVoid AsyncAdjustIconNumInternal<T>(List<T> listIcon, int tarNum, Transform parentTrans, int maxNumPerFrame,
-            Action<T, int> updateAction, GameObject prefab, string assetPath) where T : UIWidget, new()
-        {
-            if (listIcon == null)
-            {
+            Action<T, int> updateAction, GameObject prefab, string assetPath) where T : UIWidget, new() {
+            if (listIcon == null) {
                 listIcon = new List<T>();
             }
 
             int createCnt = 0;
 
-            for (int i = 0; i < tarNum; i++)
-            {
+            for (int i = 0; i < tarNum; i++) {
                 T tmpT = null;
-                if (i < listIcon.Count)
-                {
+                if (i < listIcon.Count) {
                     tmpT = listIcon[i];
-                }
-                else
-                {
-                    if (prefab == null)
-                    {
+                } else {
+                    if (prefab == null) {
                         tmpT = await CreateWidgetByPathAsync<T>(parentTrans, assetPath);
-                    }
-                    else
-                    {
+                    } else {
                         tmpT = CreateWidgetByPrefab<T>(prefab, parentTrans);
                     }
 
@@ -472,46 +413,38 @@ namespace TEngine
                 }
 
                 int index = i;
-                if (updateAction != null)
-                {
+                if (updateAction != null) {
                     updateAction(tmpT, index);
                 }
 
                 createCnt++;
-                if (createCnt >= maxNumPerFrame)
-                {
+                if (createCnt >= maxNumPerFrame) {
                     createCnt = 0;
                     await UniTask.Yield();
                 }
             }
 
-            if (listIcon.Count > tarNum)
-            {
+            if (listIcon.Count > tarNum) {
                 RemoveUnUseItem(listIcon, tarNum);
             }
         }
 
-        private void RemoveUnUseItem<T>(List<T> listIcon, int tarNum) where T : UIWidget
-        {
+        private void RemoveUnUseItem<T>(List<T> listIcon, int tarNum) where T : UIWidget {
             var removeIcon = new List<T>();
-            for (int iconIdx = 0; iconIdx < listIcon.Count; iconIdx++)
-            {
+            for (int iconIdx = 0; iconIdx < listIcon.Count; iconIdx++) {
                 var icon = listIcon[iconIdx];
-                if (iconIdx >= tarNum)
-                {
+                if (iconIdx >= tarNum) {
                     removeIcon.Add(icon);
                 }
             }
 
-            for (var index = 0; index < removeIcon.Count; index++)
-            {
+            for (var index = 0; index < removeIcon.Count; index++) {
                 var icon = removeIcon[index];
                 listIcon.Remove(icon);
                 icon.OnDestroy();
                 icon.OnDestroyWidget();
                 ListChild.Remove(icon);
-                if (icon.gameObject != null)
-                {
+                if (icon.gameObject != null) {
                     UnityEngine.Object.Destroy(icon.gameObject);
                 }
             }

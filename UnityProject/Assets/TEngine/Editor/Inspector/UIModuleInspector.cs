@@ -1,17 +1,14 @@
 ﻿using UnityEditor;
 
-namespace TEngine.Editor.Inspector
-{
+namespace TEngine.Editor.Inspector {
     [CustomEditor(typeof(UIModule))]
-    internal sealed class UIModuleInspector : GameFrameworkInspector
-    {
+    internal sealed class UIModuleInspector : GameFrameworkInspector {
         private SerializedProperty m_InstanceRoot = null;
         private SerializedProperty m_enableErrorLog = null;
         private SerializedProperty m_dontDestroyUIRoot = null;
         private SerializedProperty m_UICamera = null;
 
-        public override void OnInspectorGUI()
-        {
+        public override void OnInspectorGUI() {
             base.OnInspectorGUI();
 
             serializedObject.Update();
@@ -32,15 +29,13 @@ namespace TEngine.Editor.Inspector
             Repaint();
         }
 
-        protected override void OnCompileComplete()
-        {
+        protected override void OnCompileComplete() {
             base.OnCompileComplete();
 
             RefreshTypeNames();
         }
 
-        private void OnEnable()
-        {
+        private void OnEnable() {
             m_InstanceRoot = serializedObject.FindProperty("m_InstanceRoot");
             m_enableErrorLog = serializedObject.FindProperty("m_enableErrorLog");
             m_dontDestroyUIRoot = serializedObject.FindProperty("m_dontDestroyUIRoot");
@@ -49,8 +44,7 @@ namespace TEngine.Editor.Inspector
             RefreshTypeNames();
         }
 
-        private void RefreshTypeNames()
-        {
+        private void RefreshTypeNames() {
             serializedObject.ApplyModifiedProperties();
         }
     }

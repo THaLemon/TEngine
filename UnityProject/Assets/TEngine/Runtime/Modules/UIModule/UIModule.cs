@@ -4,14 +4,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using YooAsset;
 
-namespace TEngine
-{
+namespace TEngine {
     /// <summary>
     /// UI模块。
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed partial class UIModule : Module
-    {
+    public sealed partial class UIModule : Module {
         [SerializeField] private Transform m_InstanceRoot = null;
 
         [SerializeField] private bool m_dontDestroyUIRoot = true;
@@ -43,11 +41,9 @@ namespace TEngine
 
         private ErrorLogger _errorLogger;
 
-        private void Start()
-        {
+        private void Start() {
             RootModule rootModule = ModuleSystem.GetModule<RootModule>();
-            if (rootModule == null)
-            {
+            if (rootModule == null) {
                 Log.Fatal("Base component is invalid.");
                 return;
             }
@@ -55,22 +51,18 @@ namespace TEngine
             _uiModuleImpl = ModuleImpSystem.GetModule<UIModuleImpl>();
             _uiModuleImpl.Initialize(_stack);
 
-            if (m_InstanceRoot == null)
-            {
+            if (m_InstanceRoot == null) {
                 m_InstanceRoot = new GameObject("UI Form Instances").transform;
                 m_InstanceRoot.SetParent(gameObject.transform);
                 m_InstanceRoot.localScale = Vector3.one;
-            }
-            else if (m_dontDestroyUIRoot)
-            {
+            } else if (m_dontDestroyUIRoot) {
                 DontDestroyOnLoad(m_InstanceRoot.parent != null ? m_InstanceRoot.parent : m_InstanceRoot);
             }
 
             m_InstanceRoot.gameObject.layer = LayerMask.NameToLayer("UI");
             UIRootStatic = m_InstanceRoot;
-            
-            switch (GameModule.Debugger.ActiveWindowType)
-            {
+
+            switch (GameModule.Debugger.ActiveWindowType) {
                 case DebuggerActiveWindowType.AlwaysOpen:
                     m_enableErrorLog = true;
                     break;
@@ -87,22 +79,18 @@ namespace TEngine
                     m_enableErrorLog = false;
                     break;
             }
-            if (m_enableErrorLog)
-            {
+            if (m_enableErrorLog) {
                 _errorLogger = new ErrorLogger();
             }
         }
 
-        private void OnDestroy()
-        {
-            if (_errorLogger != null)
-            {
+        private void OnDestroy() {
+            if (_errorLogger != null) {
                 _errorLogger.Dispose();
                 _errorLogger = null;
             }
             CloseAll();
-            if (m_InstanceRoot != null && m_InstanceRoot.parent != null)
-            {
+            if (m_InstanceRoot != null && m_InstanceRoot.parent != null) {
                 Destroy(m_InstanceRoot.parent.gameObject);
             }
         }
@@ -113,11 +101,9 @@ namespace TEngine
         /// 设置屏幕安全区域（异形屏支持）。
         /// </summary>
         /// <param name="safeRect">安全区域</param>
-        public static void ApplyScreenSafeRect(Rect safeRect)
-        {
+        public static void ApplyScreenSafeRect(Rect safeRect) {
             CanvasScaler scaler = UIRootStatic.GetComponentInParent<CanvasScaler>();
-            if (scaler == null)
-            {
+            if (scaler == null) {
                 Log.Error($"Not found {nameof(CanvasScaler)} !");
                 return;
             }
@@ -135,8 +121,7 @@ namespace TEngine
 
             // 注意：安全区坐标系的原点为左下角	
             var rectTrans = UIRootStatic.transform as RectTransform;
-            if (rectTrans != null)
-            {
+            if (rectTrans != null) {
                 rectTrans.offsetMin = new Vector2(posX, posY); //锚框状态下的屏幕左下角偏移向量
                 rectTrans.offsetMax = new Vector2(-offsetMaxX, -offsetMaxY); //锚框状态下的屏幕右上角偏移向量
             }
@@ -145,18 +130,14 @@ namespace TEngine
         /// <summary>
         /// 模拟IPhoneX异形屏
         /// </summary>
-        public static void SimulateIPhoneXNotchScreen()
-        {
+        public static void SimulateIPhoneXNotchScreen() {
             Rect rect;
-            if (Screen.height > Screen.width)
-            {
+            if (Screen.height > Screen.width) {
                 // 竖屏Portrait
                 float deviceWidth = 1125;
                 float deviceHeight = 2436;
                 rect = new Rect(0f / deviceWidth, 102f / deviceHeight, 1125f / deviceWidth, 2202f / deviceHeight);
-            }
-            else
-            {
+            } else {
                 // 横屏Landscape
                 float deviceWidth = 2436;
                 float deviceHeight = 1125;
@@ -172,10 +153,8 @@ namespace TEngine
         /// <summary>
         /// 获取所有层级下顶部的窗口名称。
         /// </summary>
-        public string GetTopWindow()
-        {
-            if (_stack.Count == 0)
-            {
+        public string GetTopWindow() {
+            if (_stack.Count == 0) {
                 return string.Empty;
             }
 
@@ -186,11 +165,9 @@ namespace TEngine
         /// <summary>
         /// 获取指定层级下顶部的窗口名称。
         /// </summary>
-        public string GetTopWindow(int layer)
-        {
+        public string GetTopWindow(int layer) {
             UIWindow lastOne = null;
-            for (int i = 0; i < _stack.Count; i++)
-            {
+            for (int i = 0; i < _stack.Count; i++) {
                 if (_stack[i].WindowLayer == layer)
                     lastOne = _stack[i];
             }
@@ -204,10 +181,8 @@ namespace TEngine
         /// <summary>
         /// 是否有任意窗口正在加载。
         /// </summary>
-        public bool IsAnyLoading()
-        {
-            for (int i = 0; i < _stack.Count; i++)
-            {
+        public bool IsAnyLoading() {
+            for (int i = 0; i < _stack.Count; i++) {
                 var window = _stack[i];
                 if (window.IsLoadDone == false)
                     return true;
@@ -221,8 +196,7 @@ namespace TEngine
         /// </summary>
         /// <typeparam name="T">界面类型。</typeparam>
         /// <returns>是否存在。</returns>
-        public bool HasWindow<T>()
-        {
+        public bool HasWindow<T>() {
             return HasWindow(typeof(T));
         }
 
@@ -231,18 +205,16 @@ namespace TEngine
         /// </summary>
         /// <param name="type">界面类型。</param>
         /// <returns>是否存在。</returns>
-        public bool HasWindow(Type type)
-        {
+        public bool HasWindow(Type type) {
             return IsContains(type.FullName);
         }
 
-       /// <summary>
+        /// <summary>
         /// 异步打开窗口。
         /// </summary>
         /// <param name="userDatas">用户自定义数据。</param>
         /// <returns>打开窗口操作句柄。</returns>
-        public void ShowUIAsync<T>(params System.Object[] userDatas) where T : UIWindow
-        {
+        public void ShowUIAsync<T>(params System.Object[] userDatas) where T : UIWindow {
             ShowUIImp(typeof(T), true, userDatas);
         }
 
@@ -252,8 +224,7 @@ namespace TEngine
         /// <param name="type">界面类型。</param>
         /// <param name="userDatas">用户自定义数据。</param>
         /// <returns>打开窗口操作句柄。</returns>
-        public void ShowUIAsync(Type type, params System.Object[] userDatas)
-        {
+        public void ShowUIAsync(Type type, params System.Object[] userDatas) {
             ShowUIImp(type, true, userDatas);
         }
 
@@ -263,8 +234,7 @@ namespace TEngine
         /// <typeparam name="T">窗口类。</typeparam>
         /// <param name="userDatas">用户自定义数据。</param>
         /// <returns>打开窗口操作句柄。</returns>
-        public void ShowUI<T>(params System.Object[] userDatas) where T : UIWindow
-        {
+        public void ShowUI<T>(params System.Object[] userDatas) where T : UIWindow {
             ShowUIImp(typeof(T), false, userDatas);
         }
 
@@ -274,25 +244,20 @@ namespace TEngine
         /// <param name="type"></param>
         /// <param name="userDatas"></param>
         /// <returns>打开窗口操作句柄。</returns>
-        public void ShowUI(Type type, params System.Object[] userDatas)
-        {
+        public void ShowUI(Type type, params System.Object[] userDatas) {
             ShowUIImp(type, false, userDatas);
         }
 
-        private void ShowUIImp(Type type, bool isAsync, params System.Object[] userDatas)
-        {
+        private void ShowUIImp(Type type, bool isAsync, params System.Object[] userDatas) {
             string windowName = type.FullName;
 
             // 如果窗口已经存在
-            if (IsContains(windowName))
-            {
+            if (IsContains(windowName)) {
                 UIWindow window = GetWindow(windowName);
                 Pop(window); //弹出窗口
                 Push(window); //重新压入
                 window.TryInvoke(OnWindowPrepare, userDatas);
-            }
-            else
-            {
+            } else {
                 UIWindow window = CreateInstance(type);
                 Push(window); //首次压入
                 window.InternalLoad(window.AssetName, OnWindowPrepare, isAsync, userDatas).Forget();
@@ -302,13 +267,11 @@ namespace TEngine
         /// <summary>
         /// 关闭窗口
         /// </summary>
-        public void CloseUI<T>() where T : UIWindow
-        {
+        public void CloseUI<T>() where T : UIWindow {
             CloseUI(typeof(T));
         }
 
-        public void CloseUI(Type type)
-        {
+        public void CloseUI(Type type) {
             string windowName = type.FullName;
             UIWindow window = GetWindow(windowName);
             if (window == null)
@@ -319,41 +282,34 @@ namespace TEngine
             OnSortWindowDepth(window.WindowLayer);
             OnSetWindowVisible();
         }
-        
-        public void HideUI<T>() where T : UIWindow
-        {
+
+        public void HideUI<T>() where T : UIWindow {
             HideUI(typeof(T));
         }
 
-        public void HideUI(Type type)
-        {
+        public void HideUI(Type type) {
             string windowName = type.FullName;
             UIWindow window = GetWindow(windowName);
-            if (window == null)
-            {
+            if (window == null) {
                 return;
             }
 
-            if (window.HideTimeToClose <= 0)
-            {
+            if (window.HideTimeToClose <= 0) {
                 CloseUI(type);
                 return;
             }
-            
+
             window.Visible = false;
-            window.HideTimerId = GameModule.Timer.AddTimer((arg) =>
-            {
+            window.HideTimerId = GameModule.Timer.AddTimer((arg) => {
                 CloseUI(type);
-            },window.HideTimeToClose);
+            }, window.HideTimeToClose);
         }
 
         /// <summary>
         /// 关闭所有窗口。
         /// </summary>
-        public void CloseAll()
-        {
-            for (int i = 0; i < _stack.Count; i++)
-            {
+        public void CloseAll() {
+            for (int i = 0; i < _stack.Count; i++) {
                 UIWindow window = _stack[i];
                 window.InternalDestroy();
             }
@@ -364,13 +320,10 @@ namespace TEngine
         /// <summary>
         /// 关闭所有窗口除了。
         /// </summary>
-        public void CloseAllWithOut(UIWindow withOut)
-        {
-            for (int i = _stack.Count - 1; i >= 0; i--)
-            {
+        public void CloseAllWithOut(UIWindow withOut) {
+            for (int i = _stack.Count - 1; i >= 0; i--) {
                 UIWindow window = _stack[i];
-                if (window == withOut)
-                {
+                if (window == withOut) {
                     continue;
                 }
 
@@ -382,13 +335,10 @@ namespace TEngine
         /// <summary>
         /// 关闭所有窗口除了。
         /// </summary>
-        public void CloseAllWithOut<T>() where T : UIWindow
-        {
-            for (int i = _stack.Count - 1; i >= 0; i--)
-            {
+        public void CloseAllWithOut<T>() where T : UIWindow {
+            for (int i = _stack.Count - 1; i >= 0; i--) {
                 UIWindow window = _stack[i];
-                if (window.GetType() == typeof(T))
-                {
+                if (window.GetType() == typeof(T)) {
                     continue;
                 }
 
@@ -397,76 +347,59 @@ namespace TEngine
             }
         }
 
-        private void OnWindowPrepare(UIWindow window)
-        {
+        private void OnWindowPrepare(UIWindow window) {
             OnSortWindowDepth(window.WindowLayer);
             window.InternalCreate();
             window.InternalRefresh();
             OnSetWindowVisible();
         }
 
-        private void OnSortWindowDepth(int layer)
-        {
+        private void OnSortWindowDepth(int layer) {
             int depth = layer * LAYER_DEEP;
-            for (int i = 0; i < _stack.Count; i++)
-            {
-                if (_stack[i].WindowLayer == layer)
-                {
+            for (int i = 0; i < _stack.Count; i++) {
+                if (_stack[i].WindowLayer == layer) {
                     _stack[i].Depth = depth;
                     depth += WINDOW_DEEP;
                 }
             }
         }
 
-        private void OnSetWindowVisible()
-        {
+        private void OnSetWindowVisible() {
             bool isHideNext = false;
-            for (int i = _stack.Count - 1; i >= 0; i--)
-            {
+            for (int i = _stack.Count - 1; i >= 0; i--) {
                 UIWindow window = _stack[i];
-                if (isHideNext == false)
-                {
+                if (isHideNext == false) {
                     window.Visible = true;
-                    if (window.IsPrepare && window.FullScreen)
-                    {
+                    if (window.IsPrepare && window.FullScreen) {
                         isHideNext = true;
                     }
-                }
-                else
-                {
+                } else {
                     window.Visible = false;
                 }
             }
         }
 
-        private UIWindow CreateInstance(Type type)
-        {
+        private UIWindow CreateInstance(Type type) {
             UIWindow window = Activator.CreateInstance(type) as UIWindow;
             WindowAttribute attribute = Attribute.GetCustomAttribute(type, typeof(WindowAttribute)) as WindowAttribute;
 
             if (window == null)
                 throw new GameFrameworkException($"Window {type.FullName} create instance failed.");
 
-            if (attribute != null)
-            {
+            if (attribute != null) {
                 string assetName = string.IsNullOrEmpty(attribute.Location) ? type.Name : attribute.Location;
                 window.Init(type.FullName, attribute.WindowLayer, attribute.FullScreen, assetName, attribute.FromResources, attribute.HideTimeToClose);
-            }
-            else
-            {
+            } else {
                 window.Init(type.FullName, (int)UILayer.UI, fullScreen: window.FullScreen, assetName: type.Name, fromResources: false, hideTimeToClose: 10);
             }
 
             return window;
         }
 
-        private UIWindow GetWindow(string windowName)
-        {
-            for (int i = 0; i < _stack.Count; i++)
-            {
+        private UIWindow GetWindow(string windowName) {
+            for (int i = 0; i < _stack.Count; i++) {
                 UIWindow window = _stack[i];
-                if (window.WindowName == windowName)
-                {
+                if (window.WindowName == windowName) {
                     return window;
                 }
             }
@@ -474,13 +407,10 @@ namespace TEngine
             return null;
         }
 
-        private bool IsContains(string windowName)
-        {
-            for (int i = 0; i < _stack.Count; i++)
-            {
+        private bool IsContains(string windowName) {
+            for (int i = 0; i < _stack.Count; i++) {
                 UIWindow window = _stack[i];
-                if (window.WindowName == windowName)
-                {
+                if (window.WindowName == windowName) {
                     return true;
                 }
             }
@@ -488,37 +418,30 @@ namespace TEngine
             return false;
         }
 
-        private void Push(UIWindow window)
-        {
+        private void Push(UIWindow window) {
             // 如果已经存在
             if (IsContains(window.WindowName))
                 throw new System.Exception($"Window {window.WindowName} is exist.");
 
             // 获取插入到所属层级的位置
             int insertIndex = -1;
-            for (int i = 0; i < _stack.Count; i++)
-            {
-                if (window.WindowLayer == _stack[i].WindowLayer)
-                {
+            for (int i = 0; i < _stack.Count; i++) {
+                if (window.WindowLayer == _stack[i].WindowLayer) {
                     insertIndex = i + 1;
                 }
             }
 
             // 如果没有所属层级，找到相邻层级
-            if (insertIndex == -1)
-            {
-                for (int i = 0; i < _stack.Count; i++)
-                {
-                    if (window.WindowLayer > _stack[i].WindowLayer)
-                    {
+            if (insertIndex == -1) {
+                for (int i = 0; i < _stack.Count; i++) {
+                    if (window.WindowLayer > _stack[i].WindowLayer) {
                         insertIndex = i + 1;
                     }
                 }
             }
 
             // 如果是空栈或没有找到插入位置
-            if (insertIndex == -1)
-            {
+            if (insertIndex == -1) {
                 insertIndex = 0;
             }
 
@@ -526,39 +449,30 @@ namespace TEngine
             _stack.Insert(insertIndex, window);
         }
 
-        private void Pop(UIWindow window)
-        {
+        private void Pop(UIWindow window) {
             // 从堆栈里移除
             _stack.Remove(window);
         }
     }
 
     [UpdateModule]
-    internal sealed partial class UIModuleImpl : ModuleImp
-    {
+    internal sealed partial class UIModuleImpl : ModuleImp {
         private List<UIWindow> _stack;
 
-        internal void Initialize(List<UIWindow> stack)
-        {
+        internal void Initialize(List<UIWindow> stack) {
             _stack = stack;
         }
 
-        internal override void Shutdown()
-        {
+        internal override void Shutdown() {
         }
 
-        internal override void Update(float elapseSeconds, float realElapseSeconds)
-        {
+        internal override void Update(float elapseSeconds, float realElapseSeconds) {
             if (_stack == null)
-            {
                 return;
-            }
 
             int count = _stack.Count;
-            for (int i = 0; i < _stack.Count; i++)
-            {
-                if (_stack.Count != count)
-                {
+            for (int i = 0; i < _stack.Count; i++) {
+                if (_stack.Count != count) {
                     break;
                 }
 

@@ -5,10 +5,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
-namespace TEngine
-{
-    public abstract class UIWindow : UIBase
-    {
+namespace TEngine {
+    public abstract class UIWindow : UIBase {
         #region Propreties
 
         private System.Action<UIWindow> _prepareCallback;
@@ -31,7 +29,7 @@ namespace TEngine
         /// 窗口位置组件。
         /// </summary>
         public override Transform transform => _panel.transform;
-        
+
         /// <summary>
         /// 窗口矩阵位置组件。
         /// </summary>
@@ -66,27 +64,22 @@ namespace TEngine
         /// 是内部资源无需AB加载。
         /// </summary>
         public bool FromResources { private set; get; }
-        
+
         /// <summary>
         /// 隐藏窗口关闭时间。
         /// </summary>
         public int HideTimeToClose { get; set; }
-        
+
         public int HideTimerId { get; set; }
 
         /// <summary>
         /// 自定义数据。
         /// </summary>
-        public System.Object UserData
-        {
-            get
-            {
-                if (userDatas != null && userDatas.Length >= 1)
-                {
+        public System.Object UserData {
+            get {
+                if (userDatas != null && userDatas.Length >= 1) {
                     return userDatas[0];
-                }
-                else
-                {
+                } else {
                     return null;
                 }
             }
@@ -100,26 +93,18 @@ namespace TEngine
         /// <summary>
         /// 窗口深度值。
         /// </summary>
-        public int Depth
-        {
-            get
-            {
-                if (_canvas != null)
-                {
+        public int Depth {
+            get {
+                if (_canvas != null) {
                     return _canvas.sortingOrder;
-                }
-                else
-                {
+                } else {
                     return 0;
                 }
             }
 
-            set
-            {
-                if (_canvas != null)
-                {
-                    if (_canvas.sortingOrder == value)
-                    {
+            set {
+                if (_canvas != null) {
+                    if (_canvas.sortingOrder == value) {
                         return;
                     }
 
@@ -128,19 +113,16 @@ namespace TEngine
 
                     // 设置子类
                     int depth = value;
-                    for (int i = 0; i < _childCanvas.Length; i++)
-                    {
+                    for (int i = 0; i < _childCanvas.Length; i++) {
                         var canvas = _childCanvas[i];
-                        if (canvas != _canvas)
-                        {
+                        if (canvas != _canvas) {
                             depth += 5; //注意递增值
                             canvas.sortingOrder = depth;
                         }
                     }
 
                     // 虚函数
-                    if (_isCreate)
-                    {
+                    if (_isCreate) {
                         OnSortDepth(value);
                     }
                 }
@@ -150,32 +132,24 @@ namespace TEngine
         /// <summary>
         /// 窗口可见性
         /// </summary>
-        public bool Visible
-        {
-            get
-            {
-                if (_canvas != null)
-                {
+        public bool Visible {
+            get {
+                if (_canvas != null) {
                     return _canvas.gameObject.layer == UIModule.WINDOW_SHOW_LAYER;
-                }
-                else
-                {
+                } else {
                     return false;
                 }
             }
 
-            set
-            {
-                if (_canvas != null)
-                {
+            set {
+                if (_canvas != null) {
                     int setLayer = value ? UIModule.WINDOW_SHOW_LAYER : UIModule.WINDOW_HIDE_LAYER;
                     if (_canvas.gameObject.layer == setLayer)
                         return;
 
                     // 显示设置
                     _canvas.gameObject.layer = setLayer;
-                    for (int i = 0; i < _childCanvas.Length; i++)
-                    {
+                    for (int i = 0; i < _childCanvas.Length; i++) {
                         _childCanvas[i].gameObject.layer = setLayer;
                     }
 
@@ -183,8 +157,7 @@ namespace TEngine
                     Interactable = value;
 
                     // 虚函数
-                    if (_isCreate)
-                    {
+                    if (_isCreate) {
                         OnSetVisible(value);
                     }
                 }
@@ -194,27 +167,19 @@ namespace TEngine
         /// <summary>
         /// 窗口交互性
         /// </summary>
-        private bool Interactable
-        {
-            get
-            {
-                if (_raycaster != null)
-                {
+        private bool Interactable {
+            get {
+                if (_raycaster != null) {
                     return _raycaster.enabled;
-                }
-                else
-                {
+                } else {
                     return false;
                 }
             }
 
-            set
-            {
-                if (_raycaster != null)
-                {
+            set {
+                if (_raycaster != null) {
                     _raycaster.enabled = value;
-                    for (int i = 0; i < _childRaycaster.Length; i++)
-                    {
+                    for (int i = 0; i < _childRaycaster.Length; i++) {
                         _childRaycaster[i].enabled = value;
                     }
                 }
@@ -228,8 +193,7 @@ namespace TEngine
 
         #endregion
 
-        public void Init(string name, int layer, bool fullScreen, string assetName, bool fromResources, int hideTimeToClose)
-        {
+        public void Init(string name, int layer, bool fullScreen, string assetName, bool fromResources, int hideTimeToClose) {
             WindowName = name;
             WindowLayer = layer;
             FullScreen = fullScreen;
@@ -238,48 +202,35 @@ namespace TEngine
             HideTimeToClose = hideTimeToClose;
         }
 
-        internal void TryInvoke(System.Action<UIWindow> prepareCallback, System.Object[] userDatas)
-        {
+        internal void TryInvoke(System.Action<UIWindow> prepareCallback, System.Object[] userDatas) {
             base.userDatas = userDatas;
-            if (IsPrepare)
-            {
+            if (IsPrepare) {
                 prepareCallback?.Invoke(this);
-            }
-            else
-            {
+            } else {
                 _prepareCallback = prepareCallback;
             }
             CancelHideToCloseTimer();
         }
 
-        internal async UniTaskVoid InternalLoad(string location, Action<UIWindow> prepareCallback, bool isAsync, System.Object[] userDatas)
-        {
+        internal async UniTaskVoid InternalLoad(string location, Action<UIWindow> prepareCallback, bool isAsync, System.Object[] userDatas) {
             _prepareCallback = prepareCallback;
             this.userDatas = userDatas;
-            if (!FromResources)
-            {
-                if (isAsync)
-                {
+            if (!FromResources) {
+                if (isAsync) {
                     var uiInstance = await GameModule.Resource.LoadGameObjectAsync(location, parent: GameModule.UI.UIRoot);
                     Handle_Completed(uiInstance);
-                }
-                else
-                {
+                } else {
                     var uiInstance = GameModule.Resource.LoadGameObject(location, parent: GameModule.UI.UIRoot);
                     Handle_Completed(uiInstance);
                 }
-            }
-            else
-            {
+            } else {
                 GameObject panel = Object.Instantiate(Resources.Load<GameObject>(location), GameModule.UI.UIRoot);
                 Handle_Completed(panel);
             }
         }
 
-        internal void InternalCreate()
-        {
-            if (_isCreate == false)
-            {
+        internal void InternalCreate() {
+            if (_isCreate == false) {
                 _isCreate = true;
                 ScriptGenerator();
                 BindMemberProperty();
@@ -288,49 +239,37 @@ namespace TEngine
             }
         }
 
-        internal void InternalRefresh()
-        {
+        internal void InternalRefresh() {
             OnRefresh();
         }
 
-        internal bool InternalUpdate()
-        {
-            if (!IsPrepare || !Visible)
-            {
+        internal bool InternalUpdate() {
+            if (!IsPrepare || !Visible) {
                 return false;
             }
 
             List<UIWidget> listNextUpdateChild = null;
-            if (ListChild != null && ListChild.Count > 0)
-            {
+            if (ListChild != null && ListChild.Count > 0) {
                 listNextUpdateChild = m_listUpdateChild;
                 var updateListValid = m_updateListValid;
                 List<UIWidget> listChild = null;
-                if (!updateListValid)
-                {
-                    if (listNextUpdateChild == null)
-                    {
+                if (!updateListValid) {
+                    if (listNextUpdateChild == null) {
                         listNextUpdateChild = new List<UIWidget>();
                         m_listUpdateChild = listNextUpdateChild;
-                    }
-                    else
-                    {
+                    } else {
                         listNextUpdateChild.Clear();
                     }
 
                     listChild = ListChild;
-                }
-                else
-                {
+                } else {
                     listChild = listNextUpdateChild;
                 }
 
-                for (int i = 0; i < listChild.Count; i++)
-                {
+                for (int i = 0; i < listChild.Count; i++) {
                     var uiWidget = listChild[i];
 
-                    if (uiWidget == null)
-                    {
+                    if (uiWidget == null) {
                         continue;
                     }
 
@@ -338,14 +277,12 @@ namespace TEngine
                     var needValid = uiWidget.InternalUpdate();
                     TProfiler.EndSample();
 
-                    if (!updateListValid && needValid)
-                    {
+                    if (!updateListValid && needValid) {
                         listNextUpdateChild.Add(uiWidget);
                     }
                 }
 
-                if (!updateListValid)
-                {
+                if (!updateListValid) {
                     m_updateListValid = true;
                 }
             }
@@ -353,14 +290,11 @@ namespace TEngine
             TProfiler.BeginSample("OnUpdate");
 
             bool needUpdate = false;
-            if (listNextUpdateChild == null || listNextUpdateChild.Count <= 0)
-            {
+            if (listNextUpdateChild == null || listNextUpdateChild.Count <= 0) {
                 HasOverrideUpdate = true;
                 OnUpdate();
                 needUpdate = HasOverrideUpdate;
-            }
-            else
-            {
+            } else {
                 OnUpdate();
                 needUpdate = true;
             }
@@ -370,14 +304,12 @@ namespace TEngine
             return needUpdate;
         }
 
-        internal void InternalDestroy()
-        {
+        internal void InternalDestroy() {
             _isCreate = false;
 
             RemoveAllUIEvent();
 
-            for (int i = 0; i < ListChild.Count; i++)
-            {
+            for (int i = 0; i < ListChild.Count; i++) {
                 var uiChild = ListChild[i];
                 uiChild.CallDestroy();
                 uiChild.OnDestroyWidget();
@@ -389,8 +321,7 @@ namespace TEngine
             OnDestroy();
 
             // 销毁面板对象
-            if (_panel != null)
-            {
+            if (_panel != null) {
                 Object.Destroy(_panel);
                 _panel = null;
             }
@@ -401,23 +332,20 @@ namespace TEngine
         /// 处理资源加载完成回调。
         /// </summary>
         /// <param name="panel">面板资源实例。</param>
-        private void Handle_Completed(GameObject panel)
-        {
-            if (panel == null)
-            {
+        private void Handle_Completed(GameObject panel) {
+            if (panel == null) {
                 return;
             }
 
             IsLoadDone = true;
-            
+
             panel.name = GetType().Name;
             _panel = panel;
             _panel.transform.localPosition = Vector3.zero;
 
             // 获取组件
             _canvas = _panel.GetComponent<Canvas>();
-            if (_canvas == null)
-            {
+            if (_canvas == null) {
                 throw new Exception($"Not found {nameof(Canvas)} in panel {WindowName}");
             }
 
@@ -435,15 +363,12 @@ namespace TEngine
             _prepareCallback?.Invoke(this);
         }
 
-        protected virtual void Close()
-        {
+        protected virtual void Close() {
             GameModule.UI.CloseUI(this.GetType());
         }
 
-        internal void CancelHideToCloseTimer()
-        {
-            if (HideTimerId > 0)
-            {
+        internal void CancelHideToCloseTimer() {
+            if (HideTimerId > 0) {
                 GameModule.Timer.RemoveTimer(HideTimerId);
                 HideTimerId = 0;
             }

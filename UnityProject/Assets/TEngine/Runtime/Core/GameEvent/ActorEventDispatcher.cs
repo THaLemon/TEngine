@@ -19,16 +19,15 @@ Example:
                 
                 // owner监听自身事件并绑定持有对象为owner。 比如是组件的情况下。移除时调用RemoveAllListenerByOwner(owner)会根据持有对象（组件）移除。
                 owner.Event.AddEventListener(eventId,xxx,owner);
+                // rum: ActorEventDispatcher内部维护一个EventRegInfo的字典_allEventListenerMap，允许注册、注销监听；使用两个list标记事件的"正在处理"、"移除"缓存。需要移除正在处理的事件需要等待其执行完成。
 ************************************************************************************************************/
 #endregion
 
-namespace TEngine
-{
+namespace TEngine {
     /// <summary>
     /// 局部单位事件分发器。
     /// </summary>
-    public class ActorEventDispatcher : IMemory
-    {
+    public class ActorEventDispatcher : IMemory {
         /// <summary>
         /// 所有事件。
         /// </summary>
@@ -44,8 +43,7 @@ namespace TEngine
         /// </summary>
         private readonly List<int> _delayDeleteEventList;
 
-        public ActorEventDispatcher()
-        {
+        public ActorEventDispatcher() {
             _processEventList = new List<int>();
             _delayDeleteEventList = new List<int>();
             _allEventListenerMap = new Dictionary<int, List<EventRegInfo>>();
@@ -54,15 +52,12 @@ namespace TEngine
         /// <summary>
         /// 移除所有事件监听。
         /// </summary>
-        public void DestroyAllEventListener()
-        {
+        public void DestroyAllEventListener() {
             var itr = _allEventListenerMap.GetEnumerator();
-            while (itr.MoveNext())
-            {
+            while (itr.MoveNext()) {
                 var kv = itr.Current;
                 List<EventRegInfo> list = kv.Value;
-                foreach (var eventRegInfo in list)
-                {
+                foreach (var eventRegInfo in list) {
                     EventRegInfo.Release(eventRegInfo);
                 }
                 kv.Value.Clear();
@@ -77,10 +72,8 @@ namespace TEngine
         /// 延迟移除事件。
         /// </summary>
         /// <param name="eventId"></param>
-        private void AddDelayDelete(int eventId)
-        {
-            if (!_delayDeleteEventList.Contains(eventId))
-            {
+        private void AddDelayDelete(int eventId) {
+            if (!_delayDeleteEventList.Contains(eventId)) {
                 _delayDeleteEventList.Add(eventId);
                 Log.Info("delay delete eventId[{0}]", eventId);
             }
@@ -90,19 +83,14 @@ namespace TEngine
         /// 如果找到eventId对应的监听，删除所有标记为delete的监听。
         /// </summary>
         /// <param name="eventId">事件Id。</param>
-        private void CheckDelayDelete(int eventId)
-        {
-            if (_delayDeleteEventList.Contains(eventId))
-            {
-                if (_allEventListenerMap.TryGetValue(eventId, out var listListener))
-                {
-                    for (int i = 0; i < listListener.Count; i++)
-                    {
-                        if (listListener[i].IsDeleted)
-                        {
+        private void CheckDelayDelete(int eventId) {
+            if (_delayDeleteEventList.Contains(eventId)) {
+                if (_allEventListenerMap.TryGetValue(eventId, out var listListener)) {
+                    for (int i = 0; i < listListener.Count; i++) {
+                        if (listListener[i].IsDeleted) {
                             Log.Info("remove delay delete eventId[{0}]", eventId);
-                            listListener[i] = listListener[^1];
                             EventRegInfo.Release(listListener[i]);
+                            listListener[i] = listListener[^1];
                             listListener.RemoveAt(listListener.Count - 1);
                             i--;
                         }
@@ -117,30 +105,23 @@ namespace TEngine
         /// 发送事件。
         /// </summary>
         /// <param name="eventId">事件Id。</param>
-        public void SendEvent(int eventId)
-        {
-            if (_allEventListenerMap.TryGetValue(eventId, out var listListener))
-            {
+        public void SendEvent(int eventId) {
+            if (_allEventListenerMap.TryGetValue(eventId, out var listListener)) {
                 _processEventList.Add(eventId);
 #if UNITY_EDITOR
                 int iEventCnt = _processEventList.Count;
 #endif
 
                 var count = listListener.Count;
-                for (int i = 0; i < count; i++)
-                {
+                for (int i = 0; i < count; i++) {
                     var node = listListener[i];
-                    if (node.IsDeleted)
-                    {
+                    if (node.IsDeleted) {
                         continue;
                     }
 
-                    if (listListener[i].Callback is Action callBack)
-                    {
+                    if (listListener[i].Callback is Action callBack) {
                         callBack();
-                    }
-                    else
-                    {
+                    } else {
                         Log.Fatal("Invalid event data type: {0}", eventId);
                     }
                 }
@@ -162,30 +143,23 @@ namespace TEngine
         /// <param name="eventId">事件Id。</param>
         /// <param name="arg1">事件参数。</param>
         /// <typeparam name="TArg1">事件参数类型1。</typeparam>
-        public void SendEvent<TArg1>(int eventId, TArg1 arg1)
-        {
-            if (_allEventListenerMap.TryGetValue(eventId, out var listListener))
-            {
+        public void SendEvent<TArg1>(int eventId, TArg1 arg1) {
+            if (_allEventListenerMap.TryGetValue(eventId, out var listListener)) {
                 _processEventList.Add(eventId);
 #if UNITY_EDITOR
                 int iEventCnt = _processEventList.Count;
 #endif
 
                 var count = listListener.Count;
-                for (int i = 0; i < count; i++)
-                {
+                for (int i = 0; i < count; i++) {
                     var node = listListener[i];
-                    if (node.IsDeleted)
-                    {
+                    if (node.IsDeleted) {
                         continue;
                     }
 
-                    if (listListener[i].Callback is Action<TArg1> callBack)
-                    {
+                    if (listListener[i].Callback is Action<TArg1> callBack) {
                         callBack(arg1);
-                    }
-                    else
-                    {
+                    } else {
                         Log.Fatal("Invalid event data type: {0}", eventId);
                     }
                 }
@@ -195,7 +169,6 @@ namespace TEngine
                 Log.Assert(iEventCnt == _processEventList.Count);
                 Log.Assert(eventId == _processEventList[^1]);
 #endif
-
                 _processEventList.RemoveAt(_processEventList.Count - 1);
 
                 CheckDelayDelete(eventId);
@@ -210,30 +183,23 @@ namespace TEngine
         /// <param name="arg2">事件参数2。</param>
         /// <typeparam name="TArg1">事件参数类型1。</typeparam>
         /// <typeparam name="TArg2">事件参数类型2。</typeparam>
-        public void SendEvent<TArg1, TArg2>(int eventId, TArg1 arg1, TArg2 arg2)
-        {
-            if (_allEventListenerMap.TryGetValue(eventId, out var listListener))
-            {
+        public void SendEvent<TArg1, TArg2>(int eventId, TArg1 arg1, TArg2 arg2) {
+            if (_allEventListenerMap.TryGetValue(eventId, out var listListener)) {
                 _processEventList.Add(eventId);
 #if UNITY_EDITOR
                 int iEventCnt = _processEventList.Count;
 #endif
 
                 var count = listListener.Count;
-                for (int i = 0; i < count; i++)
-                {
+                for (int i = 0; i < count; i++) {
                     var node = listListener[i];
-                    if (node.IsDeleted)
-                    {
+                    if (node.IsDeleted) {
                         continue;
                     }
 
-                    if (listListener[i].Callback is Action<TArg1, TArg2> callBack)
-                    {
+                    if (listListener[i].Callback is Action<TArg1, TArg2> callBack) {
                         callBack(arg1, arg2);
-                    }
-                    else
-                    {
+                    } else {
                         Log.Fatal("Invalid event data type: {0}", eventId);
                     }
                 }
@@ -259,30 +225,23 @@ namespace TEngine
         /// <typeparam name="TArg1">事件参数类型1。</typeparam>
         /// <typeparam name="TArg2">事件参数类型2。</typeparam>
         /// <typeparam name="TArg3">事件参数类型3。</typeparam>
-        public void SendEvent<TArg1, TArg2, TArg3>(int eventId, TArg1 arg1, TArg2 arg2, TArg3 arg3)
-        {
-            if (_allEventListenerMap.TryGetValue(eventId, out var listListener))
-            {
+        public void SendEvent<TArg1, TArg2, TArg3>(int eventId, TArg1 arg1, TArg2 arg2, TArg3 arg3) {
+            if (_allEventListenerMap.TryGetValue(eventId, out var listListener)) {
                 _processEventList.Add(eventId);
 #if UNITY_EDITOR
                 int iEventCnt = _processEventList.Count;
 #endif
 
                 var count = listListener.Count;
-                for (int i = 0; i < count; i++)
-                {
+                for (int i = 0; i < count; i++) {
                     var node = listListener[i];
-                    if (node.IsDeleted)
-                    {
+                    if (node.IsDeleted) {
                         continue;
                     }
 
-                    if (node.Callback is Action<TArg1, TArg2, TArg3> callBack)
-                    {
+                    if (node.Callback is Action<TArg1, TArg2, TArg3> callBack) {
                         callBack(arg1, arg2, arg3);
-                    }
-                    else
-                    {
+                    } else {
                         Log.Fatal("Invalid event data type: {0}", eventId);
                     }
                 }
@@ -310,10 +269,8 @@ namespace TEngine
         /// <typeparam name="TArg2">事件参数类型2。</typeparam>
         /// <typeparam name="TArg3">事件参数类型3。</typeparam>
         /// <typeparam name="TArg4">事件参数类型4。</typeparam>
-        public void SendEvent<TArg1, TArg2, TArg3, TArg4>(int eventId, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4)
-        {
-            if (_allEventListenerMap.TryGetValue(eventId, out var listListener))
-            {
+        public void SendEvent<TArg1, TArg2, TArg3, TArg4>(int eventId, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4) {
+            if (_allEventListenerMap.TryGetValue(eventId, out var listListener)) {
                 _processEventList.Add(eventId);
 #if UNITY_EDITOR
                 int iEventCnt = _processEventList.Count;
@@ -321,20 +278,15 @@ namespace TEngine
 
 
                 var count = listListener.Count;
-                for (int i = 0; i < count; i++)
-                {
+                for (int i = 0; i < count; i++) {
                     var node = listListener[i];
-                    if (node.IsDeleted)
-                    {
+                    if (node.IsDeleted) {
                         continue;
                     }
 
-                    if (listListener[i].Callback is Action<TArg1, TArg2, TArg3, TArg4> callBack)
-                    {
+                    if (listListener[i].Callback is Action<TArg1, TArg2, TArg3, TArg4> callBack) {
                         callBack(arg1, arg2, arg3, arg4);
-                    }
-                    else
-                    {
+                    } else {
                         Log.Fatal("Invalid event data type: {0}", eventId);
                     }
                 }
@@ -356,8 +308,7 @@ namespace TEngine
         /// <param name="eventId">事件Id。</param>
         /// <param name="eventCallback">事件回调。</param>
         /// <param name="owner">持有者Tag。</param>
-        public void AddEventListener(int eventId, Action eventCallback, object owner)
-        {
+        public void AddEventListener(int eventId, Action eventCallback, object owner) {
             AddEventListenerImp(eventId, eventCallback, owner);
         }
 
@@ -368,8 +319,7 @@ namespace TEngine
         /// <param name="eventCallback">事件回调。</param>
         /// <param name="owner">持有者Tag。</param>
         /// <typeparam name="TArg1">事件参数类型1。</typeparam>
-        public void AddEventListener<TArg1>(int eventId, Action<TArg1> eventCallback, object owner)
-        {
+        public void AddEventListener<TArg1>(int eventId, Action<TArg1> eventCallback, object owner) {
             AddEventListenerImp(eventId, eventCallback, owner);
         }
 
@@ -381,8 +331,7 @@ namespace TEngine
         /// <param name="owner">持有者Tag。</param>
         /// <typeparam name="TArg1">事件参数类型1。</typeparam>
         /// <typeparam name="TArg2">事件参数类型2。</typeparam>
-        public void AddEventListener<TArg1, TArg2>(int eventId, Action<TArg1, TArg2> eventCallback, object owner)
-        {
+        public void AddEventListener<TArg1, TArg2>(int eventId, Action<TArg1, TArg2> eventCallback, object owner) {
             AddEventListenerImp(eventId, eventCallback, owner);
         }
 
@@ -395,8 +344,7 @@ namespace TEngine
         /// <typeparam name="TArg1">事件参数类型1。</typeparam>
         /// <typeparam name="TArg2">事件参数类型2。</typeparam>
         /// <typeparam name="TArg3">事件参数类型3。</typeparam>
-        public void AddEventListener<TArg1, TArg2, TArg3>(int eventId, Action<TArg1, TArg2, TArg3> eventCallback, object owner)
-        {
+        public void AddEventListener<TArg1, TArg2, TArg3>(int eventId, Action<TArg1, TArg2, TArg3> eventCallback, object owner) {
             AddEventListenerImp(eventId, eventCallback, owner);
         }
 
@@ -410,8 +358,7 @@ namespace TEngine
         /// <typeparam name="TArg2">事件参数类型2。</typeparam>
         /// <typeparam name="TArg3">事件参数类型3。</typeparam>
         /// <typeparam name="TArg4">事件参数类型4。</typeparam>
-        public void AddEventListener<TArg1, TArg2, TArg3, TArg4>(int eventId, Action<TArg1, TArg2, TArg3, TArg4> eventCallback, object owner)
-        {
+        public void AddEventListener<TArg1, TArg2, TArg3, TArg4>(int eventId, Action<TArg1, TArg2, TArg3, TArg4> eventCallback, object owner) {
             AddEventListenerImp(eventId, eventCallback, owner);
         }
 
@@ -421,19 +368,15 @@ namespace TEngine
         /// <param name="eventId">事件Id。</param>
         /// <param name="listener">事件回调。</param>
         /// <param name="owner">持有者Tag。</param>
-        private void AddEventListenerImp(int eventId, Delegate listener, object owner)
-        {
-            if (!_allEventListenerMap.TryGetValue(eventId, out var listListener))
-            {
+        private void AddEventListenerImp(int eventId, Delegate listener, object owner) {
+            if (!_allEventListenerMap.TryGetValue(eventId, out var listListener)) {
                 listListener = new List<EventRegInfo>();
                 _allEventListenerMap.Add(eventId, listListener);
             }
 
             var existNode = listListener.Find((node) => node.Callback == listener);
-            if (existNode != null)
-            {
-                if (existNode.IsDeleted)
-                {
+            if (existNode != null) {
+                if (existNode.IsDeleted) {
                     existNode.IsDeleted = false;
                     Log.Warning("AddEvent hashId deleted, repeat add: {0}", eventId);
                     return;
@@ -450,11 +393,9 @@ namespace TEngine
         /// 通过持有者Tag移除监听。
         /// </summary>
         /// <param name="owner">持有者Tag。</param>
-        public void RemoveAllListenerByOwner(object owner)
-        {
+        public void RemoveAllListenerByOwner(object owner) {
             var itr = _allEventListenerMap.GetEnumerator();
-            while (itr.MoveNext())
-            {
+            while (itr.MoveNext()) {
                 var kv = itr.Current;
                 var list = kv.Value;
 
@@ -462,28 +403,22 @@ namespace TEngine
                 bool isProcessing = _processEventList.Contains(eventId);
                 bool delayDeleted = false;
 
-                for (int i = 0; i < list.Count; i++)
-                {
+                for (int i = 0; i < list.Count; i++) {
                     var regInfo = list[i];
-                    if (regInfo.Owner == owner)
-                    {
-                        if (isProcessing)
-                        {
+                    if (regInfo.Owner == owner) {
+                        if (isProcessing) {
                             regInfo.IsDeleted = true;
                             delayDeleted = true;
-                        }
-                        else
-                        {
-                            list[i] = list[^1];
+                        } else {
                             EventRegInfo.Release(list[i]);
+                            list[i] = list[^1];
                             list.RemoveAt(list.Count - 1);
                             i--;
                         }
                     }
                 }
 
-                if (delayDeleted)
-                {
+                if (delayDeleted) {
                     AddDelayDelete(eventId);
                 }
             }
@@ -496,8 +431,7 @@ namespace TEngine
         /// </summary>
         /// <param name="eventId">事件Id。</param>
         /// <param name="eventCallback">消息回调。</param>
-        public void RemoveEventListener(int eventId, Action eventCallback)
-        {
+        public void RemoveEventListener(int eventId, Action eventCallback) {
             RemoveEventListenerImp(eventId, eventCallback);
         }
 
@@ -507,8 +441,7 @@ namespace TEngine
         /// <param name="eventId">事件Id。</param>
         /// <param name="eventCallback">消息回调。</param>
         /// <typeparam name="TArg1">参数类型1。</typeparam>
-        public void RemoveEventListener<TArg1>(int eventId, Action<TArg1> eventCallback)
-        {
+        public void RemoveEventListener<TArg1>(int eventId, Action<TArg1> eventCallback) {
             RemoveEventListenerImp(eventId, eventCallback);
         }
 
@@ -519,8 +452,7 @@ namespace TEngine
         /// <param name="eventCallback">消息回调。</param>
         /// <typeparam name="TArg1">参数类型1。</typeparam>
         /// <typeparam name="TArg2">参数类型2。</typeparam>
-        public void RemoveEventListener<TArg1, TArg2>(int eventId, Action<TArg1, TArg2> eventCallback)
-        {
+        public void RemoveEventListener<TArg1, TArg2>(int eventId, Action<TArg1, TArg2> eventCallback) {
             RemoveEventListenerImp(eventId, eventCallback);
         }
 
@@ -532,8 +464,7 @@ namespace TEngine
         /// <typeparam name="TArg1">参数类型1。</typeparam>
         /// <typeparam name="TArg2">参数类型2。</typeparam>
         /// <typeparam name="TArg3">参数类型3。</typeparam>
-        public void RemoveEventListener<TArg1, TArg2, TArg3>(int eventId, Action<TArg1, TArg2, TArg3> eventCallback)
-        {
+        public void RemoveEventListener<TArg1, TArg2, TArg3>(int eventId, Action<TArg1, TArg2, TArg3> eventCallback) {
             RemoveEventListenerImp(eventId, eventCallback);
         }
 
@@ -546,8 +477,7 @@ namespace TEngine
         /// <typeparam name="TArg2">参数类型2。</typeparam>
         /// <typeparam name="TArg3">参数类型3。</typeparam>
         /// <typeparam name="TArg4">参数类型4。</typeparam>
-        public void RemoveEventListener<TArg1, TArg2, TArg3, TArg4>(int eventId, Action<TArg1, TArg2, TArg3, TArg4> eventCallback)
-        {
+        public void RemoveEventListener<TArg1, TArg2, TArg3, TArg4>(int eventId, Action<TArg1, TArg2, TArg3, TArg4> eventCallback) {
             RemoveEventListenerImp(eventId, eventCallback);
         }
 
@@ -556,23 +486,26 @@ namespace TEngine
         /// </summary>
         /// <param name="eventId">事件Id。</param>
         /// <param name="listener">事件监听。</param>
-        protected void RemoveEventListenerImp(int eventId, Delegate listener)
-        {
-            if (_allEventListenerMap.TryGetValue(eventId, out var listListener))
-            {
+        protected void RemoveEventListenerImp(int eventId, Delegate listener) {
+            if (_allEventListenerMap.TryGetValue(eventId, out var list)) {
                 bool isProcessing = _processEventList.Contains(eventId);
-                if (!isProcessing)
-                {
-                    listListener.RemoveAll(node => node.Callback == listener);
-                }
-                else
-                {
-                    int listenCnt = listListener.Count;
-                    for (int i = 0; i < listenCnt; i++)
-                    {
-                        var node = listListener[i];
-                        if (node.Callback == listener)
-                        {
+                if (!isProcessing) {
+                    //listListener.RemoveAll(node => node.Callback == listener);
+                    #region 池化修正
+                    for (int i = 0; i < list.Count; i++) {
+                        if (list[i].Callback == listener) {
+                            EventRegInfo.Release(list[i]);
+                            list[i] = list[^1];
+                            list.RemoveAt(list.Count - 1);
+                            i--;
+                        }
+                    }
+                    #endregion
+                } else {
+                    int listenCnt = list.Count;
+                    for (int i = 0; i < listenCnt; i++) {
+                        var node = list[i];
+                        if (node.Callback == listener) {
                             node.IsDeleted = true;
                             AddDelayDelete(eventId);
                             break;
@@ -585,17 +518,15 @@ namespace TEngine
         /// <summary>
         /// 清除回收接口。
         /// </summary>
-        public void Clear()
-        {
+        public void Clear() {
             DestroyAllEventListener();
         }
     }
-    
+
     /// <summary>
     /// 事件注册信息。
     /// </summary>
-    public class EventRegInfo : IMemory
-    {
+    public class EventRegInfo : IMemory {
         /// <summary>
         /// 事件回调。
         /// </summary>
@@ -611,33 +542,29 @@ namespace TEngine
         /// </summary>
         public bool IsDeleted;
 
-        public EventRegInfo(Delegate callback, object owner)
-        {
+        public EventRegInfo(Delegate callback, object owner) {
             this.Callback = callback;
             Owner = owner;
             IsDeleted = false;
         }
-        
+
         public EventRegInfo() { }
 
-        public void Clear()
-        {
+        public void Clear() {
             Callback = null;
             Owner = null;
             IsDeleted = false;
         }
 
-        public static EventRegInfo Alloc(Delegate callback, object owner)
-        {
+        public static EventRegInfo Alloc(Delegate callback, object owner) {
             EventRegInfo ret = MemoryPool.Acquire<EventRegInfo>();
             ret.Callback = callback;
             ret.Owner = owner;
             ret.IsDeleted = false;
             return ret;
         }
-        
-        public static void Release(EventRegInfo eventRegInfo)
-        {
+
+        public static void Release(EventRegInfo eventRegInfo) {
             MemoryPool.Release(eventRegInfo);
         }
     }

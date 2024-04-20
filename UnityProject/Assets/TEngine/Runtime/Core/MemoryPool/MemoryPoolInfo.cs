@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace TEngine
-{
+namespace TEngine {
     /// <summary>
     /// 内存池信息。
     /// </summary>
     [StructLayout(LayoutKind.Auto)]
-    public struct MemoryPoolInfo
-    {
+    public struct MemoryPoolInfo {
         private readonly Type _type;
         private readonly int _unusedMemoryCount;
         private readonly int _usingMemoryCount;
@@ -27,8 +25,7 @@ namespace TEngine
         /// <param name="releaseMemoryCount">归还内存对象数量。</param>
         /// <param name="addMemoryCount">增加内存对象数量。</param>
         /// <param name="removeMemoryCount">移除内存对象数量。</param>
-        public MemoryPoolInfo(Type type, int unusedMemoryCount, int usingMemoryCount, int acquireMemoryCount, int releaseMemoryCount, int addMemoryCount, int removeMemoryCount)
-        {
+        public MemoryPoolInfo(Type type, int unusedMemoryCount, int usingMemoryCount, int acquireMemoryCount, int releaseMemoryCount, int addMemoryCount, int removeMemoryCount) {
             _type = type;
             _unusedMemoryCount = unusedMemoryCount;
             _usingMemoryCount = usingMemoryCount;
@@ -41,10 +38,8 @@ namespace TEngine
         /// <summary>
         /// 获取内存池类型。
         /// </summary>
-        public Type Type
-        {
-            get
-            {
+        public Type Type {
+            get {
                 return _type;
             }
         }
@@ -52,10 +47,8 @@ namespace TEngine
         /// <summary>
         /// 获取未使用内存对象数量。
         /// </summary>
-        public int UnusedMemoryCount
-        {
-            get
-            {
+        public int UnusedMemoryCount {
+            get {
                 return _unusedMemoryCount;
             }
         }
@@ -63,10 +56,8 @@ namespace TEngine
         /// <summary>
         /// 获取正在使用内存对象数量。
         /// </summary>
-        public int UsingMemoryCount
-        {
-            get
-            {
+        public int UsingMemoryCount {
+            get {
                 return _usingMemoryCount;
             }
         }
@@ -74,10 +65,8 @@ namespace TEngine
         /// <summary>
         /// 获取获取内存对象数量。
         /// </summary>
-        public int AcquireMemoryCount
-        {
-            get
-            {
+        public int AcquireMemoryCount {
+            get {
                 return _acquireMemoryCount;
             }
         }
@@ -85,10 +74,8 @@ namespace TEngine
         /// <summary>
         /// 获取归还内存对象数量。
         /// </summary>
-        public int ReleaseMemoryCount
-        {
-            get
-            {
+        public int ReleaseMemoryCount {
+            get {
                 return _releaseMemoryCount;
             }
         }
@@ -96,10 +83,8 @@ namespace TEngine
         /// <summary>
         /// 获取增加内存对象数量。
         /// </summary>
-        public int AddMemoryCount
-        {
-            get
-            {
+        public int AddMemoryCount {
+            get {
                 return _addMemoryCount;
             }
         }
@@ -107,10 +92,8 @@ namespace TEngine
         /// <summary>
         /// 获取移除内存对象数量。
         /// </summary>
-        public int RemoveMemoryCount
-        {
-            get
-            {
+        public int RemoveMemoryCount {
+            get {
                 return _removeMemoryCount;
             }
         }

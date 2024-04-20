@@ -1,17 +1,14 @@
 ﻿using UnityEngine;
 
-namespace TEngine
-{
+namespace TEngine {
     /// <summary>
     /// 游戏框架模块抽象类。
     /// </summary>
-    public abstract class Module : MonoBehaviour
-    {
+    public abstract class Module : MonoBehaviour {
         /// <summary>
         /// 游戏框架模块初始化。
         /// </summary>
-        protected virtual void Awake()
-        {
+        protected virtual void Awake() {
             ModuleSystem.RegisterModule(this);
         }
     }
